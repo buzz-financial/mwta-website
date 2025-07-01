@@ -16,11 +16,12 @@
 
     <!-- Navigation links -->
     <ul :class="['navbar_links', { 'is-open': isOpen }]">
-      <li><RouterLink to="/">Home</RouterLink></li>
-      <li><RouterLink to="/programs">Programs</RouterLink></li>
-      <li><RouterLink to="/tournaments">Tournaments</RouterLink></li>
-      <li><RouterLink to="/staff">Staff</RouterLink></li>
-      <li><RouterLink to="/contact">Client Contact</RouterLink></li>
+      <li class="navbar_item"><RouterLink to="/">Home</RouterLink></li>
+      <li class="navbar_item"><RouterLink to="/clinics">Clinics</RouterLink></li>
+      <li class="navbar_item"><RouterLink to="/privatelessons">Private Lessons</RouterLink></li>
+      <li class="navbar_item"><RouterLink to="/tournaments">Tournaments</RouterLink></li>
+      <li class="navbar_item"><RouterLink to="/staff">Staff</RouterLink></li>
+      <li class="navbar_item"><RouterLink to="/contact">Contact</RouterLink></li>
     </ul>
   </nav>
 </template>
@@ -55,7 +56,7 @@ onUnmounted(() => window.removeEventListener("scroll", onScroll));
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #3452a376;
+  background: #3452a3ab;
   color: #fff;
   z-index: 1000;
   transition: transform 0.3s ease;
@@ -81,14 +82,28 @@ onUnmounted(() => window.removeEventListener("scroll", onScroll));
   transition: max-height 0.3s ease;
 }
 
+/* 1) Make all links positioning relative */
 .navbar_links a {
+  position: relative;
+  padding: 0.5rem;
   color: inherit;
   text-decoration: none;
-  padding: 0.5rem;
 }
 
-.navbar_links .router-link-active {
-  border-bottom: 2px solid #dfff4f;
+.navbar_links a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px; /* same height */
+  width: 0;
+  background: #dfff4f;
+  transition: width 0.3s ease;
+}
+
+.navbar_links a:hover::after,
+.navbar_links a.router-link-active::after {
+  width: 100%;
 }
 
 /* Hamburger toggle hidden on desktop */
@@ -132,7 +147,7 @@ onUnmounted(() => window.removeEventListener("scroll", onScroll));
     top: 80px;
     left: 0;
     right: 0;
-    background: #606481;
+    background: #3452a3ab;
     flex-direction: column;
     align-items: center;
     max-height: 0;
