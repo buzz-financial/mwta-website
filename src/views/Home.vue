@@ -2,7 +2,7 @@
   <!-- full-bleed hero -->
   <section class="hero" :style="{ backgroundImage: `url(${heroBg})` }">
     <div class="hero-content">
-      <h1>Get it mikes way</h1>
+      <h1>Get It Mikes Way</h1>
       <button class="cta-button" @click="$router.push('/programs')">Register Today</button>
     </div>
   </section>
@@ -56,20 +56,20 @@
   <section class="programs container">
     <h2>Our Programs</h2>
     <div class="cards">
-      <div class="card" :style="{ backgroundImage: `url(${juniorImg})` }">
+      <div class="card" :style="{ backgroundImage: `url(${juniorImg})` }" @click="$router.push('/clinics')">
         <h3>Junior Clinics (K-12)</h3>
         <p>Age-grouped training focused on fundamentals.</p>
       </div>
 
-      <div class="card" :style="{ backgroundImage: `url(${adultImg})` }">
+      <div class="card" :style="{ backgroundImage: `url(${adultImg})` }" @click="$router.push('/clinics')">
         <h3>Adult Clinics</h3>
         <p>Drills & match play for beginners through advanced adults.</p>
       </div>
-      <div class="card" :style="{ backgroundImage: `url(${privateImg})` }">
+      <div class="card" :style="{ backgroundImage: `url(${privateImg})` }" @click="$router.push('/privatelessons')">
         <h3>Private Lessons</h3>
         <p>One-on-one coaching to fine-tune technique and strategy.</p>
       </div>
-      <div class="card" :style="{ backgroundImage: `url(${tournamentImg})` }">
+      <div class="card" :style="{ backgroundImage: `url(${tournamentImg})` }" @click="$router.push('/tournaments')">
         <h3>Tournaments</h3>
         <p>Multi-day tournaments.</p>
       </div>
@@ -245,13 +245,14 @@ h2 {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   text-align: center;
   /* add transition for hover effect */
+  cursor: pointer;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 /* hover effect on program cards */
 .programs .card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(223, 255, 79, 0.5);
 }
 
 .programs .cards {
