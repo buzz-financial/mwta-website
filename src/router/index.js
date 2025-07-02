@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Home from "../views/Home.vue";
-import Clinics from "../views/Clinics.vue";
+import Junior from "../views/Junior.vue";
+import Adult from "../views/Adult.vue";
 import PrivateLessons from "../views/PrivateLessons.vue";
 import Tournaments from "../views/Tournaments.vue";
 import Staff from "../views/Staff.vue";
@@ -8,7 +9,8 @@ import Contact from "../views/Contact.vue";
 
 const routes = [
   { path: "/", name: "Home", component: Home },
-  { path: "/clinics", name: "Clinics", component: Clinics },
+  { path: "/junior", name: "Junior", component: Junior },
+  { path: "/adult", name: "Adult", component: Adult },
   { path: "/privatelessons", name: "PrivateLessons", component: PrivateLessons },
   { path: "/tournaments", name: "Tournaments", component: Tournaments },
   { path: "/staff", name: "Staff", component: Staff },
@@ -18,6 +20,18 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
+  scrollBehavior(to, from, savedPosition) {
+    // If there's a saved position (e.g., from browser back/forward), use it
+    if (savedPosition) {
+      return savedPosition;
+    }
+    // If navigating to a hash anchor, scroll to that element
+    if (to.hash) {
+      return { el: to.hash };
+    }
+    // Otherwise, scroll to top
+    return { top: 0 };
+  },
 });
 
 export default router;

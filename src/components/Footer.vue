@@ -5,13 +5,9 @@
       <div class="footer__hours">
         <h3>Business Hours</h3>
         <ul>
-          <li><strong>Monday:</strong>9am – 5pm</li>
-          <li><strong>Tuesday:</strong>9am – 5pm</li>
-          <li><strong>Wednesday:</strong>9am – 5pm</li>
-          <li><strong>Thursday:</strong>9am – 5pm</li>
-          <li><strong>Friday:</strong>9am – 5pm</li>
-          <li><strong>Saturday:</strong>9am – 12:30pm</li>
-          <li><strong>Sunday:</strong> Closed</li>
+          <li><strong>Monday - Friday:</strong> 9:00 AM – 5:00 PM</li>
+          <li><strong>Saturday:</strong> 9:00 AM – 12:30 PM</li>
+          <li><strong>Sunday:</strong> CLOSED</li>
         </ul>
       </div>
 
@@ -25,8 +21,9 @@
         <h3>Location & Hours</h3>
         <p>Mike White Tennis Academy</p>
         <p>
-          3082 S Bloomington Dr East <br />
-          St. George, UT 84790
+          3174 South Bloomington Drive East
+          <br />
+          St. George, Utah 84790
         </p>
         <p>
           <a href="tel:8017359434">(801) 735-9434</a><br />

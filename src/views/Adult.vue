@@ -1,8 +1,8 @@
 <template>
   <!-- full-width hero -->
-  <Hero title="Clinics & Programs" :backgroundImage="heroImg" />
+  <Hero title="Adult Clinics" :backgroundImage="heroImg" />
 
-  <h1>Clinics & Programs</h1>
+  <h1>Adult Clinics</h1>
 </template>
 
 <script setup>
