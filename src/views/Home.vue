@@ -153,12 +153,6 @@
       <div class="coach-card">
         <div class="coach-image">
           <img src="../assets/mikeportrait.png" alt="Coach Mike White" />
-          <div class="coach-overlay">
-            <div class="coach-social">
-              <button class="social-btn">📧</button>
-              <button class="social-btn">📞</button>
-            </div>
-          </div>
         </div>
         <div class="coach-info">
           <h3>Mike White</h3>
@@ -170,12 +164,6 @@
       <div class="coach-card">
         <div class="coach-image">
           <img src="../assets/beccaportrait.png" alt="Coach Sara Lee" />
-          <div class="coach-overlay">
-            <div class="coach-social">
-              <button class="social-btn">📧</button>
-              <button class="social-btn">📞</button>
-            </div>
-          </div>
         </div>
         <div class="coach-info">
           <h3>Sara Lee</h3>
@@ -184,12 +172,20 @@
         </div>
       </div>
 
-      <div class="coach-card coming-soon">
-        <div class="coming-soon-content">
-          <div class="coming-soon-icon">👋</div>
-          <h3>Join Our Team</h3>
-          <p>We're always looking for passionate tennis professionals.</p>
-          <button class="apply-btn">Apply Now</button>
+      <div class="coach-card placeholder-card">
+        <div class="empty-coach-content">
+          <div class="empty-coach-image">
+            <div class="placeholder-icon">
+              <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+              </svg>
+            </div>
+          </div>
+          <div class="empty-coach-info">
+            <h3 class="placeholder-name">Coming Soon</h3>
+            <p class="placeholder-title">New Coach</p>
+          </div>
         </div>
       </div>
     </div>
@@ -260,6 +256,12 @@ const clinicImages = [juniorImg, adultImg, privateImg, tournamentImg];
 </script>
 
 <style scoped>
+/* Performance Optimizations */
+* {
+  /* Use hardware acceleration for transforms */
+  will-change: auto;
+}
+
 /* Enhanced Global Styles */
 .container {
   max-width: 1200px;
@@ -306,7 +308,7 @@ const clinicImages = [juniorImg, adultImg, privateImg, tournamentImg];
   margin-bottom: 4rem;
 }
 
-/* Enhanced Hero Section */
+/* Enhanced Hero Section - Optimized */
 .hero {
   position: relative;
   width: 100vw;
@@ -318,7 +320,7 @@ const clinicImages = [juniorImg, adultImg, privateImg, tournamentImg];
   height: 90vh;
   background-size: cover;
   background-position: center;
-  background-attachment: fixed;
+  /* Remove background-attachment: fixed for better performance */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -366,11 +368,14 @@ const clinicImages = [juniorImg, adultImg, privateImg, tournamentImg];
   box-shadow: 0 10px 30px rgba(223, 255, 79, 0.4);
 }
 
+/* Optimized floating elements */
 .floating-element {
   position: absolute;
   background: rgba(223, 255, 79, 0.1);
   border-radius: 50%;
   animation: float 6s ease-in-out infinite;
+  /* Use transform3d for hardware acceleration */
+  transform: translate3d(0, 0, 0);
 }
 
 .element-1 {
@@ -397,13 +402,14 @@ const clinicImages = [juniorImg, adultImg, privateImg, tournamentImg];
   animation-delay: 4s;
 }
 
+/* Optimized keyframe animation */
 @keyframes float {
   0%,
   100% {
-    transform: translateY(0px) rotate(0deg);
+    transform: translate3d(0, 0, 0) rotate(0deg);
   }
   50% {
-    transform: translateY(-20px) rotate(180deg);
+    transform: translate3d(0, -20px, 0) rotate(180deg);
   }
 }
 
@@ -438,12 +444,14 @@ const clinicImages = [juniorImg, adultImg, privateImg, tournamentImg];
   background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
   border-radius: 16px;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
   border: 1px solid rgba(223, 255, 79, 0.2);
+  /* Use transform3d for hardware acceleration */
+  transform: translate3d(0, 0, 0);
 }
 
 .feature-card:hover {
-  transform: translateY(-5px);
+  transform: translate3d(0, -5px, 0);
   box-shadow: 0 15px 40px rgba(52, 82, 163, 0.15);
   border-color: rgba(223, 255, 79, 0.4);
 }
@@ -518,7 +526,7 @@ const clinicImages = [juniorImg, adultImg, privateImg, tournamentImg];
   margin-bottom: 1.5rem;
 }
 
-/* Enhanced Programs Section */
+/* Enhanced Programs Section - Optimized */
 .programs {
   margin: 6rem auto;
 }
@@ -538,12 +546,13 @@ const clinicImages = [juniorImg, adultImg, privateImg, tournamentImg];
   overflow: hidden;
   min-height: 300px;
   cursor: pointer;
-  transition: all 0.4s ease;
-  transform-style: preserve-3d;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  /* Simplified 3D effect for better performance */
+  transform: translate3d(0, 0, 0);
 }
 
 .program-card:hover {
-  transform: translateY(-10px) rotateX(5deg);
+  transform: translate3d(0, -10px, 0);
   box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
 }
 
@@ -551,7 +560,7 @@ const clinicImages = [juniorImg, adultImg, privateImg, tournamentImg];
   position: absolute;
   inset: 0;
   background: linear-gradient(135deg, rgba(52, 82, 163, 0.8) 0%, rgba(0, 0, 0, 0.6) 100%);
-  transition: all 0.3s ease;
+  transition: background 0.3s ease;
 }
 
 .program-card:hover .card-overlay {
@@ -599,7 +608,7 @@ const clinicImages = [juniorImg, adultImg, privateImg, tournamentImg];
   transform: translateX(10px);
 }
 
-/* Enhanced Team Section */
+/* Enhanced Team Section - Optimized */
 .team {
   margin: 6rem auto;
 }
@@ -616,12 +625,13 @@ const clinicImages = [juniorImg, adultImg, privateImg, tournamentImg];
   border-radius: 20px;
   overflow: hidden;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
   border: 1px solid rgba(223, 255, 79, 0.2);
+  transform: translate3d(0, 0, 0);
 }
 
 .coach-card:hover {
-  transform: translateY(-8px);
+  transform: translate3d(0, -8px, 0);
   box-shadow: 0 20px 50px rgba(52, 82, 163, 0.15);
   border-color: rgba(223, 255, 79, 0.4);
 }
@@ -641,44 +651,6 @@ const clinicImages = [juniorImg, adultImg, privateImg, tournamentImg];
 
 .coach-card:hover .coach-image img {
   transform: scale(1.05);
-}
-
-.coach-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.8) 100%);
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  padding: 1.5rem;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.coach-card:hover .coach-overlay {
-  opacity: 1;
-}
-
-.coach-social {
-  display: flex;
-  gap: 1rem;
-}
-
-.social-btn {
-  width: 40px;
-  height: 40px;
-  border: none;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
-  font-size: 1.2rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.social-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: translateY(-3px);
 }
 
 .coach-info {
@@ -705,42 +677,66 @@ const clinicImages = [juniorImg, adultImg, privateImg, tournamentImg];
   font-size: 0.95rem;
 }
 
-.coming-soon {
+/* Empty Coach Card Styles */
+.placeholder-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  color: #6c757d;
+  border: 2px dashed #dee2e6;
+  position: relative;
+  overflow: hidden;
+}
+
+.placeholder-card:hover {
+  border-color: #3452a3;
+  border-style: solid;
+}
+
+.empty-coach-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.empty-coach-image {
+  position: relative;
+  height: 250px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #3452a3, #4a63b3);
-  color: white;
-  text-align: center;
+  border-bottom: 1px solid #dee2e6;
+  flex-shrink: 0;
 }
 
-.coming-soon-content {
+.placeholder-icon {
+  color: #adb5bd;
+  opacity: 0.6;
+}
+
+.empty-coach-info {
   padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  flex-grow: 1;
 }
 
-.coming-soon-icon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
+.placeholder-name {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #6c757d;
+  margin-bottom: 0.5rem;
 }
 
-.apply-btn {
-  background: #dfff4f;
-  color: #2c3e50;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 25px;
+.placeholder-title {
+  font-size: 1rem;
+  color: #adb5bd;
   font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  margin-top: 1rem;
 }
 
-.apply-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(223, 255, 79, 0.4);
-}
-
-/* Enhanced Testimonials Section */
+/* Enhanced Testimonials Section - Optimized */
 .testimonials {
   background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
   padding: 6rem 2rem;
@@ -760,11 +756,12 @@ const clinicImages = [juniorImg, adultImg, privateImg, tournamentImg];
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
   position: relative;
   border: 1px solid rgba(223, 255, 79, 0.2);
-  transition: all 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transform: translate3d(0, 0, 0);
 }
 
 .testimonial-card:hover {
-  transform: translateY(-5px);
+  transform: translate3d(0, -5px, 0);
   box-shadow: 0 25px 60px rgba(52, 82, 163, 0.12);
   border-color: rgba(223, 255, 79, 0.4);
 }
@@ -828,7 +825,7 @@ const clinicImages = [juniorImg, adultImg, privateImg, tournamentImg];
   font-size: 1.1rem;
 }
 
-/* Enhanced Call-to-action button */
+/* Enhanced Call-to-action button - Optimized */
 .cta-button {
   background: linear-gradient(135deg, #dfff4f, #c8e526);
   color: #2c3e50;
@@ -838,17 +835,18 @@ const clinicImages = [juniorImg, adultImg, privateImg, tournamentImg];
   font-weight: 600;
   border-radius: 25px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   box-shadow: 0 5px 15px rgba(223, 255, 79, 0.3);
+  transform: translate3d(0, 0, 0);
 }
 
 .cta-button:hover {
-  transform: translateY(-2px);
+  transform: translate3d(0, -2px, 0);
   box-shadow: 0 8px 25px rgba(223, 255, 79, 0.5);
   background: linear-gradient(135deg, #c8e526, #dfff4f);
 }
@@ -861,8 +859,13 @@ const clinicImages = [juniorImg, adultImg, privateImg, tournamentImg];
   transform: translateX(3px);
 }
 
-/* Mobile Responsiveness */
+/* Mobile Responsiveness - Optimized */
 @media (max-width: 1024px) {
+  /* Reduce animation complexity on tablets */
+  .floating-element {
+    animation: none;
+  }
+
   .about-grid {
     grid-template-columns: 1fr;
     gap: 3rem;
@@ -878,6 +881,16 @@ const clinicImages = [juniorImg, adultImg, privateImg, tournamentImg];
 }
 
 @media (max-width: 768px) {
+  /* Disable heavy animations on mobile for better performance */
+  .floating-element {
+    display: none;
+  }
+
+  /* Reduce 3D effects on mobile */
+  .program-card:hover {
+    transform: translate3d(0, -5px, 0);
+  }
+
   .container {
     padding: 0 1rem;
   }
@@ -912,6 +925,13 @@ const clinicImages = [juniorImg, adultImg, privateImg, tournamentImg];
 }
 
 @media (max-width: 480px) {
+  /* Minimal animations on small mobile devices */
+  .coach-card:hover,
+  .feature-card:hover,
+  .testimonial-card:hover {
+    transform: translate3d(0, -2px, 0);
+  }
+
   .hero-content {
     padding: 0 1rem;
   }
@@ -933,6 +953,32 @@ const clinicImages = [juniorImg, adultImg, privateImg, tournamentImg];
 
   .feature-icon-wrapper {
     align-self: center;
+  }
+}
+
+/* Performance optimizations for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .floating-element {
+    animation: none;
+  }
+
+  * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+/* GPU acceleration hints */
+@supports (will-change: transform) {
+  .feature-card,
+  .program-card,
+  .coach-card,
+  .testimonial-card,
+  .cta-button,
+  .social-btn,
+  .apply-btn {
+    will-change: transform;
   }
 }
 </style>
