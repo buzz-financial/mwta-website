@@ -1,22 +1,16 @@
 {
-  "name": "mike_white_tennis_website",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
+  "name": "mike-white-tennis-academy",
+  "version": "1.0.0",
+  "description": "Tennis Academy Website with Vue Frontend and Express Backend",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "fontawesome": "^5.6.3",
-    "vite-express": "^0.21.1",
-    "vue": "^3.5.17",
-    "vue-router": "^4.5.1",
-    "vueperslides": "^3.6.0"
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd backend && npm run dev",
+    "client": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build",
+    "start": "cd backend && npm start",
+    "install-all": "npm install && cd frontend && npm install && cd ../backend && npm install"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^6.0.0",
-    "vite": "^7.0.0"
+    "concurrently": "^8.2.2"
   }
 }
