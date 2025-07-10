@@ -10,61 +10,70 @@
         <p class="section-subtitle">Our experienced team of tennis professionals are dedicated to helping you reach your full potential</p>
       </div>
 
+      <!-- Loading State -->
+      <div v-if="loading" class="loading-state">
+        <div class="spinner"></div>
+        <p>Loading our amazing coaches...</p>
+      </div>
+
+      <!-- Error State -->
+      <div v-else-if="error" class="error-state">
+        <p>Sorry, we couldn't load our coaches right now. Please try again later.</p>
+      </div>
+
       <!-- Staff Grid -->
-      <div class="staff-grid">
-        <div v-for="member in staffMembers" :key="member.id" class="staff-card" :class="{ 'placeholder-card': !member.name }">
-          <!-- Filled Coach Card -->
-          <template v-if="member.name">
-            <div class="staff-image">
-              <img :src="member.image" :alt="member.name" />
-              <div class="image-overlay">
-                <div class="coach-contact">
-                  <a v-if="member.email" :href="`mailto:${member.email}`" class="contact-btn">
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                      <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
-                    </svg>
-                  </a>
-                  <a v-if="member.phone" :href="`tel:${member.phone}`" class="contact-btn">
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                      <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
-                    </svg>
-                  </a>
-                </div>
-              </div>
-              <div class="experience-badge">{{ member.yearsExperience }} Years</div>
-            </div>
-
-            <div class="staff-content">
-              <h3 class="staff-name">{{ member.name }}</h3>
-              <p class="staff-title">{{ member.title }}</p>
-
-              <div class="key-specialties">
-                <span v-for="specialty in member.keySpecialties" :key="specialty" class="specialty-tag">
-                  {{ specialty }}
-                </span>
-              </div>
-
-              <div class="certification-summary" v-if="member.mainCertification">
-                <span class="cert-icon">📜</span>
-                {{ member.mainCertification }}
-              </div>
-            </div>
-          </template>
-
-          <!-- Empty Coach Card -->
-          <template v-else>
-            <div class="empty-coach-content">
-              <div class="empty-coach-image">
-                <div class="placeholder-icon">
-                  <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                    <circle cx="12" cy="7" r="4" />
+      <div v-else class="staff-grid">
+        <!-- Active Coaches -->
+        <div v-for="member in activeCoaches" :key="member.id" class="staff-card">
+          <div class="staff-image">
+            <img :src="getImageUrl(member.image)" :alt="member.name" />
+            <div class="image-overlay">
+              <div class="coach-contact">
+                <a v-if="member.email" :href="`mailto:${member.email}`" class="contact-btn">
+                  <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                    <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
                   </svg>
-                </div>
-                <div class="coming-soon-badge">Coming Soon</div>
+                </a>
+                <a v-if="member.phone" :href="`tel:${member.phone}`" class="contact-btn">
+                  <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                    <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
+                  </svg>
+                </a>
               </div>
             </div>
-          </template>
+            <div class="experience-badge">{{ member.years_experience }} Years</div>
+          </div>
+
+          <div class="staff-content">
+            <h3 class="staff-name">{{ member.name }}</h3>
+            <p class="staff-title">{{ member.title }}</p>
+
+            <div class="key-specialties">
+              <span v-for="specialty in member.key_specialties" :key="specialty" class="specialty-tag">
+                {{ specialty }}
+              </span>
+            </div>
+
+            <div class="certification-summary" v-if="member.main_certification">
+              <span class="cert-icon">📜</span>
+              {{ member.main_certification }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty Placeholder Cards (show remaining slots up to 4 total) -->
+        <div v-for="n in Math.max(0, 4 - activeCoaches.length)" :key="`empty-${n}`" class="staff-card placeholder-card">
+          <div class="empty-coach-content">
+            <div class="empty-coach-image">
+              <div class="placeholder-icon">
+                <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+              </div>
+              <div class="coming-soon-badge">Coming Soon</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -72,62 +81,137 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
+import { supabase } from "../lib/supabase";
 import Hero from "../components/Hero.vue";
 import heroImg from "../assets/tennisball_closeup_hero.jpg";
 import mikePortrait from "../assets/mikeportrait.png";
 import beccaPortrait from "../assets/beccaportrait.png";
 
-// Keep only ONE staffMembers declaration - remove any duplicates
-const staffMembers = ref([
-  {
-    id: 1,
-    name: "Mike White",
-    title: "Head Pro & Owner",
-    image: mikePortrait,
-    email: "mike@mwtennis.com",
-    phone: "(555) 123-4567",
-    yearsExperience: 15,
-    mainCertification: "USPTA Certified Professional",
-    keySpecialties: ["Junior Development", "Competitive Training", "Match Strategy"],
-  },
-  {
-    id: 2,
-    name: "Becca Little",
-    title: "Assistant Coach",
-    image: beccaPortrait,
-    email: "becca@mwtennis.com",
-    phone: "(555) 123-4568",
-    yearsExperience: 8,
-    mainCertification: "USPTA Certified Professional",
-    keySpecialties: ["Beginner Instruction", "Youth Programs", "Group Clinics"],
-  },
-  {
-    id: 3,
-    name: "",
-    title: "",
-    image: "",
-    email: "",
-    phone: "",
-    yearsExperience: 0,
-    mainCertification: "",
-    keySpecialties: [],
-  },
-  {
-    id: 4,
-    name: "",
-    title: "",
-    image: "",
-    email: "",
-    phone: "",
-    yearsExperience: 0,
-    mainCertification: "",
-    keySpecialities: [],
-  },
-]);
+// Reactive data
+const activeCoaches = ref([]);
+const loading = ref(true);
+const error = ref(null);
+
+// Image mapping for existing assets
+const imageMap = {
+  "mikeportrait.png": mikePortrait,
+  "beccaportrait.png": beccaPortrait,
+};
+
+// Helper function to get image URL
+const getImageUrl = (imageName) => {
+  return imageMap[imageName] || `https://via.placeholder.com/300x400/3452a3/ffffff?text=Photo+Coming+Soon`;
+};
+
+// Fetch coaches from Supabase
+const fetchCoaches = async () => {
+  try {
+    loading.value = true;
+    error.value = null;
+
+    const { data, error: supabaseError } = await supabase.from("coaches").select("*").eq("active", true).order("name");
+
+    if (supabaseError) {
+      throw supabaseError;
+    }
+
+    activeCoaches.value = data || [];
+  } catch (err) {
+    console.error("Error fetching coaches:", err);
+    error.value = err.message;
+
+    // Fallback to your existing data if Supabase fails
+    activeCoaches.value = [
+      {
+        id: 1,
+        name: "Mike White",
+        title: "Head Pro & Owner",
+        image: "mikeportrait.png",
+        email: "mike@mwtennis.com",
+        phone: "(801) 735-9434",
+        years_experience: 15,
+        main_certification: "USPTA Certified Professional",
+        key_specialties: ["Junior Development", "Competitive Training", "Match Strategy"],
+      },
+      {
+        id: 2,
+        name: "Becca Little",
+        title: "Assistant Coach",
+        image: "beccaportrait.png",
+        email: "becca@mwtennis.com",
+        phone: "(801) 735-9435",
+        years_experience: 8,
+        main_certification: "USPTA Certified Professional",
+        key_specialties: ["Beginner Instruction", "Youth Programs", "Group Clinics"],
+      },
+    ];
+  } finally {
+    loading.value = false;
+  }
+};
+
+// Load data when component mounts
+onMounted(() => {
+  fetchCoaches();
+});
 </script>
 
 <style scoped>
+/* All your existing styles remain the same */
+
+/* Loading and Error States */
+.loading-state,
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  text-align: center;
+  color: #6c757d;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #3452a3;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.error-state p {
+  font-size: 1.1rem;
+  max-width: 400px;
+}
+
+/* Coming Soon Badge */
+.coming-soon-badge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: linear-gradient(135deg, #6c757d, #495057);
+  color: white;
+  padding: 0.4rem 0.8rem;
+  border-radius: 15px;
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  box-shadow: 0 3px 10px rgba(108, 117, 125, 0.3);
+}
+
 /* Enhanced Global Styles */
 .staff-section {
   padding: 5rem 0;
@@ -368,30 +452,6 @@ const staffMembers = ref([
   opacity: 0.6;
 }
 
-.empty-coach-info {
-  padding: 1.5rem 1.5rem 2rem 1.5rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  flex-grow: 1;
-  text-align: center;
-  overflow: hidden;
-}
-
-.placeholder-name {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: #6c757d;
-  margin-bottom: 0.5rem;
-}
-
-.placeholder-title {
-  font-size: 1rem;
-  color: #adb5bd;
-  font-weight: 600;
-}
-
 /* Mobile Responsiveness */
 @media (max-width: 1024px) {
   .staff-grid {
@@ -431,8 +491,7 @@ const staffMembers = ref([
     height: 220px;
   }
 
-  .staff-content,
-  .empty-coach-info {
+  .staff-content {
     padding: 1.25rem 1.25rem 1.75rem 1.25rem;
     height: 160px;
   }
@@ -449,14 +508,12 @@ const staffMembers = ref([
     height: 200px;
   }
 
-  .staff-content,
-  .empty-coach-info {
+  .staff-content {
     padding: 1rem 1rem 1.5rem 1rem;
     height: 160px;
   }
 
-  .staff-name,
-  .placeholder-name {
+  .staff-name {
     font-size: 1.2rem;
   }
 
