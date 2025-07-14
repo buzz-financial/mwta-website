@@ -6,6 +6,7 @@ import PrivateLessons from "../views/PrivateLessons.vue";
 import Tournaments from "../views/Tournaments.vue";
 import Staff from "../views/Staff.vue";
 import Contact from "../views/Contact.vue";
+import { requireAuth } from "../middleware/auth.js";
 
 const routes = [
   { path: "/", name: "Home", component: Home },
@@ -15,21 +16,39 @@ const routes = [
   { path: "/tournaments", name: "Tournaments", component: Tournaments },
   { path: "/staff", name: "Staff", component: Staff },
   { path: "/contact", name: "Contact", component: Contact },
+  {
+    path: "/admin/staff",
+    name: "AdminStaff",
+    component: () => import("../views/AdminStaff.vue"),
+    beforeEnter: requireAuth,
+  },
+
+  // Auth routes
+  {
+    path: "/login",
+    name: "Login",
+    component: () => import("../views/Login.vue"),
+  },
+
+  // Protected admin routes
+  {
+    path: "/admin",
+    name: "Admin",
+    component: () => import("../views/Admin.vue"),
+    beforeEnter: requireAuth,
+  },
 ];
 
 const router = createRouter({
   history: createWebHistory(),
   routes,
   scrollBehavior(to, from, savedPosition) {
-    // If there's a saved position (e.g., from browser back/forward), use it
     if (savedPosition) {
       return savedPosition;
     }
-    // If navigating to a hash anchor, scroll to that element
     if (to.hash) {
       return { el: to.hash };
     }
-    // Otherwise, scroll to top
     return { top: 0 };
   },
 });

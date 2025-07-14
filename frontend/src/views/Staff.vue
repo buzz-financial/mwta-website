@@ -26,7 +26,7 @@
         <!-- Active Coaches -->
         <div v-for="member in activeCoaches" :key="member.id" class="staff-card">
           <div class="staff-image">
-            <img :src="getImageUrl(member.image)" :alt="member.name" />
+            <img :src="getImageUrl(member.image, member.image_url)" :alt="member.name" />
             <div class="image-overlay">
               <div class="coach-contact">
                 <a v-if="member.email" :href="`mailto:${member.email}`" class="contact-btn">
@@ -100,7 +100,11 @@ const imageMap = {
 };
 
 // Helper function to get image URL
-const getImageUrl = (imageName) => {
+const getImageUrl = (imageName, imageUrl) => {
+  // Priority: Base64 image_url > Local assets > Placeholder
+  if (imageUrl) {
+    return imageUrl; // This will be the Base64 string
+  }
   return imageMap[imageName] || `https://via.placeholder.com/300x400/3452a3/ffffff?text=Photo+Coming+Soon`;
 };
 
