@@ -1,72 +1,109 @@
 <template>
   <section class="tournaments-page">
-    <!-- Fixed Hero to match Staff page -->
     <Hero title="Tournaments" :backgroundImage="heroImg" />
 
     <div class="main-content">
       <div class="container">
         <div class="section-header">
-          <h1>Tournaments</h1>
-          <p class="section-subtitle">Join our competitive tournaments and connect with players at your skill level</p>
+          <div class="section-badge">Competition</div>
+          <h1 class="section-title">Tournament Play</h1>
+          <p class="section-subtitle">
+            You don’t train just to practice — you train to compete.
+            Tournaments turn training into confidence, toughness, and match-ready skills.
+          </p>
         </div>
-      </div>
 
-      <!-- Tournament Grid -->
-      <div class="container tournament-grid">
-        <div v-for="t in tournaments" :key="t.id" class="tournament-card">
-          <div class="card-header">
-            <h3>{{ t.name }}</h3>
-            <span class="tournament-date">{{ formatDate(t.date) }}</span>
-          </div>
-          <p class="card-text">{{ t.description }}</p>
-          <div class="card-footer">
-            <button class="register-button">Learn More & Register</button>
+        <div class="utr-cta" :style="{ backgroundImage: `url(${utrBg})` }">
+          <div class="utr-overlay"></div>
+
+          <div class="utr-content">
+            <h2>MWTA UTR Tournaments</h2>
+            <p>
+              Browse upcoming tournaments, event details, and registration all in one place on UTR.
+            </p>
+
+            <div class="utr-features" role="list">
+              <div class="utr-feature" role="listitem">
+                <div class="utr-feature-icon icon-yellow" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2"></rect>
+                    <path d="M16 2v4M8 2v4M3 10h18"></path>
+                  </svg>
+                </div>
+                <div class="utr-feature-body">
+                  <h3>Live schedule + upcoming events</h3>
+                  <p>See upcoming tournaments at a glance.</p>
+                </div>
+              </div>
+
+              <div class="utr-feature" role="listitem">
+                <div class="utr-feature-icon icon-mint" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M13 2 3 14h9l-1 8 10-12h-9z"></path>
+                  </svg>
+                </div>
+                <div class="utr-feature-body">
+                  <h3>Quick registration through UTR</h3>
+                  <p>Register fast on the official club page.</p>
+                </div>
+              </div>
+
+              <div class="utr-feature" role="listitem">
+                <div class="utr-feature-icon icon-lav" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 11l3 3L22 4"></path>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                  </svg>
+                </div>
+                <div class="utr-feature-body">
+                  <h3>Accurate event info maintained</h3>
+                  <p>Latest details are kept up-to-date on UTR.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="utr-actions">
+              <a class="btn-primary" :href="utrUrl" target="_blank" rel="noopener">
+                View More
+              </a>
+              <a class="btn-outline" :href="utrUrl" target="_blank" rel="noopener">
+                Open UTR Club Page
+              </a>
+            </div>
+
+            
           </div>
         </div>
-      </div>
 
-      <!-- CTA -->
-      <div class="container cta-wrap">
-        <h2>Ready to Register?</h2>
-        <p>Visit our tournament registration portal to secure your spot</p>
-        <button class="cta-button" @click="$router.push('/contact')">Contact Us to Register →</button>
+
+        <section class="details">
+          <div class="details-grid">
+            <div class="detail-card">
+              <div class="detail-title">Who it’s for</div>
+              <p>Juniors and adults who want real match experience and measurable progress.</p>
+            </div>
+            <div class="detail-card">
+              <div class="detail-title">What you get</div>
+              <p>Competitive matches, a clear schedule, and a tournament environment that builds confidence.</p>
+            </div>
+            <div class="detail-card">
+              <div class="detail-title">How to register</div>
+              <p>Tap “Open UTR Club Page” above to see upcoming events and complete registration on UTR.</p>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   </section>
 </template>
 
 <script setup>
-import { ref } from "vue";
 import Hero from "../components/Hero.vue";
 import heroImg from "../assets/tennisball_closeup_hero.jpg";
 
-// Simple tournament data that's realistic to maintain
-const tournaments = ref([
-  {
-    id: 1,
-    name: "Spring Open",
-    date: "2025-04-15",
-    description: "All levels welcome! Kick off the season with our most popular tournament featuring separate brackets for fair competition.",
-  },
-  {
-    id: 2,
-    name: "Summer Smash",
-    date: "2025-06-20",
-    description: "Beat the heat with evening matches under the lights. Doubles tournament with prizes for winners.",
-  },
-  {
-    id: 3,
-    name: "Fall Finale",
-    date: "2025-09-10",
-    description: "End the season strong with our championship tournament. Perfect weather and fierce competition await.",
-  },
-]);
+import utrBg from "../assets/mwa-urt.png";
 
-// Format date for display
-function formatDate(dateString) {
-  const options = { year: "numeric", month: "long", day: "numeric" };
-  return new Date(dateString).toLocaleDateString(undefined, options);
-}
+const utrUrl = "https://app.utrsports.net/clubs/10928";
 </script>
 
 <style scoped>
@@ -74,11 +111,96 @@ function formatDate(dateString) {
   min-height: 100vh;
 }
 
-.section-header {
-  text-align: center;
-  margin-bottom: 4rem;
+.main-content {
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  padding: 4rem 0;
 }
 
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.section-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #3452a3, #4a63b3);
+  color: #fff;
+  padding: 0.5rem 1.25rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 1rem;
+}
+
+.section-title {
+  font-size: clamp(2rem, 4vw, 3.25rem);
+  font-weight: 950;
+  color: #0f172a;
+  margin: 0 0 0.75rem;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.section-subtitle {
+  margin: 0 auto;
+  max-width: 70ch;
+  color: #475569;
+  line-height: 1.8;
+  font-size: 1.1rem;
+}
+
+.details {
+  margin-top: 2rem;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+.detail-card {
+  background: #fff;
+  border-radius: 18px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  padding: 1.5rem;
+  text-align: left;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.detail-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.12);
+  border-color: rgba(52, 82, 163, 0.25);
+}
+
+.detail-title {
+  font-weight: 950;
+  color: #0f172a;
+  margin-bottom: 0.5rem;
+  font-size: 1.05rem;
+}
+
+.detail-card p {
+  margin: 0;
+  color: #475569;
+  line-height: 1.7;
+}
+
+@media (max-width: 900px) {
+  .details-grid {
+    grid-template-columns: 1fr;
+  }
+}
 .section-header h1 {
   font-size: 3rem;
   color: #2c3e50;
@@ -89,255 +211,229 @@ function formatDate(dateString) {
 .section-subtitle {
   font-size: 1.2rem;
   color: #6c757d;
-  max-width: 600px;
+  max-width: 700px;
   margin: 0 auto;
   line-height: 1.6;
 }
 
-.main-content {
-  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-  padding: 4rem 0;
-}
-
-.container {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 0 2rem;
-}
-
-.page-intro {
-  text-align: center;
-  margin-bottom: 3rem;
-}
-
-.page-intro h1 {
-  font-size: 2.5rem;
-  color: #2c3e50;
-  margin-bottom: 1rem;
-  font-weight: 700;
-}
-
-.page-description {
-  text-align: center;
-  font-size: 1.2rem;
-  color: #6c757d;
-  margin-bottom: 1.5rem;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
-  line-height: 1.6;
-}
-
-.tournament-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 2rem;
-  margin-top: 2rem;
-  padding: 2rem;
-}
-
-.tournament-card {
-  background: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-  padding: 2rem;
-  display: flex;
-  flex-direction: column;
-  transition: all 0.3s ease;
-  border: 2px solid transparent;
+.utr-cta {
   position: relative;
+  border-radius: 24px;
   overflow: hidden;
-}
-
-.tournament-card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 4px;
-  background: linear-gradient(90deg, #3452a3, #dfff4f);
-}
-
-.tournament-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 16px 40px rgba(52, 82, 163, 0.2);
-  border-color: rgba(223, 255, 79, 0.3);
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 1.5rem;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.card-header h3 {
-  font-size: 1.5rem;
-  margin: 0;
-  color: #2c3e50;
-  font-weight: 600;
-}
-
-.tournament-date {
-  font-size: 0.95rem;
-  color: #3452a3;
-  font-weight: 600;
-  background: rgba(52, 82, 163, 0.1);
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
-}
-
-.card-text {
-  margin: 1rem 0 2rem 0;
-  flex-grow: 1;
-  color: #495057;
-  line-height: 1.7;
-  font-size: 1rem;
-}
-
-.card-footer {
-  margin-top: auto;
-}
-
-.register-button {
-  width: 100%;
-  background: linear-gradient(135deg, #dfff4f, #c8e526);
-  color: #2c3e50;
-  border: none;
-  padding: 1rem 1.5rem;
-  font-size: 1.1rem;
-  font-weight: 600;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.register-button:hover {
-  background: linear-gradient(135deg, #c8e526, #b8d419);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(223, 255, 79, 0.4);
-}
-
-.cta-wrap {
-  text-align: center;
-  margin-top: 4rem;
-  padding: 3rem 2rem;
-  background: linear-gradient(135deg, #3452a3, #4a63b3);
-  border-radius: 20px;
-  color: white;
-}
-
-.cta-wrap h2 {
-  margin-bottom: 1rem;
-  font-size: 2.2rem;
-  font-weight: 700;
-}
-
-.cta-wrap p {
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 1.2rem;
-  margin-bottom: 2rem;
-  line-height: 1.5;
-}
-
-.cta-button {
-  background: linear-gradient(135deg, #dfff4f, #c8e526);
-  color: #2c3e50;
-  border: none;
-  padding: 1.2rem 2.5rem;
-  font-size: 1.2rem;
-  font-weight: 600;
-  border-radius: 50px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.cta-button:hover {
-  background: linear-gradient(135deg, #c8e526, #b8d419);
-  transform: translateY(-3px);
-  box-shadow: 0 12px 24px rgba(223, 255, 79, 0.4);
-}
-
-/* Hero styles - copied from Staff page */
-.hero {
-  position: relative;
-  width: 100vw;
-  left: 50%;
-  margin-left: -50vw;
-  margin-top: -80px;
-  height: calc(60vh + 80px);
+  min-height: 420px;
   background-size: cover;
-  background-position: right center;
+  background-position: center;
+
+  /* NEW: darken the image itself */
+  background-color: rgba(0, 0, 0, 0.45);
+  background-blend-mode: multiply;
+
+  /* NEW: center the whole content block */
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
+
+  box-shadow: 0 16px 50px rgba(0, 0, 0, 0.14);
+  border: 2px solid rgba(52, 82, 163, 0.08);
+}
+
+.utr-overlay {
+  position: absolute;
+  inset: 0;
+
+  /* NEW: darker overlay gradient */
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.82) 0%,
+    rgba(20, 40, 110, 0.72) 55%,
+    rgba(0, 0, 0, 0.62) 100%
+  );
+}
+
+.utr-content {
+  position: relative;
+  z-index: 1;
+  padding: 3rem;
+  max-width: 720px;
+  color: #fff;
+}
+
+.utr-content h2 {
+  font-size: 2.6rem;
+  margin: 0 0 1rem 0;
+  font-weight: 800;
+  color: var(--utr-accent)
+}
+
+.utr-content p {
+  margin: 0 0 1.25rem 0;
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.utr-bullets {
+  margin: 0 0 2rem 1.2rem;
+  padding: 0;
+  color: rgba(255, 255, 255, 0.92);
+  line-height: 1.8;
+}
+
+.utr-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.btn-primary,
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  border-radius: 999px;
+  padding: 0.95rem 1.5rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #dfff4f, #c8e526);
+  color: #2c3e50;
+  border: none;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(223, 255, 79, 0.35);
+}
+
+.btn-outline {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(10px);
+}
+
+.btn-outline:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
+}
+
+.utr-note {
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.utr-cta {
+  --utr-accent: #dfff4f;
+}
+
+.utr-features {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 0 0 2rem 0;
+}
+
+.utr-feature {
+  gap: 0.9rem;
+  align-items: flex-start;
+  padding: 1.1rem 1.1rem;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.utr-feature:hover {
+  transform: translateY(-2px);
+  border-color: rgba(223, 255, 79, 0.35);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.24);
+}
+
+.utr-feature-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.utr-feature-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.icon-yellow {
+  background: rgba(223, 255, 79, 0.16);
+  color: #dfff4f;
+  border: 1px solid rgba(223, 255, 79, 0.28);
+}
+
+.icon-mint {
+  background: rgba(135, 255, 201, 0.16);
+  color: #87ffc9;
+  border: 1px solid rgba(135, 255, 201, 0.28);
+}
+
+.icon-lav {
+  background: rgba(168, 144, 255, 0.16);
+  color: #a890ff;
+  border: 1px solid rgba(168, 144, 255, 0.28);
+}
+
+.utr-feature-body h3 {
+  font-size: 1.2rem;
+  font-weight: 800;
+  line-height: 1.2;
+  color: #ffffff;
+  text-align: left;
+  margin-top: 1rem;
+}
+
+.utr-feature-body p {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: #f8f9fa;
+  text-align: left;
+}
+
+@media (max-width: 900px) {
+  .utr-features {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .utr-features {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 768px) {
-  .hero {
-    margin-top: -80px;
-    height: calc(40vh + 80px);
-  }
-
   .main-content {
     padding: 2rem 0;
   }
-
   .container {
     padding: 0 1rem;
   }
-
-  .page-intro h1 {
-    font-size: 2rem;
+  .section-header h1 {
+    font-size: 2.2rem;
   }
-
-  .tournament-grid {
-    grid-template-columns: 1fr;
-    padding: 1rem;
-    gap: 1.5rem;
-  }
-
-  .card-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.75rem;
-  }
-
-  .tournament-card {
-    padding: 1.5rem;
-  }
-
-  .cta-wrap {
+  .utr-content {
     padding: 2rem 1.5rem;
   }
-
-  .cta-wrap h2 {
-    font-size: 1.8rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .page-intro h1 {
-    font-size: 1.6rem;
-  }
-
-  .page-description {
-    font-size: 1rem;
-  }
-
-  .tournament-card {
-    padding: 1.25rem;
-  }
-
-  .card-header h3 {
-    font-size: 1.3rem;
+  .utr-content h2 {
+    font-size: 2rem;
   }
 }
 </style>

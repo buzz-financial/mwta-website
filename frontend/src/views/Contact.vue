@@ -193,103 +193,90 @@ const isSubmitting = ref(false);
 const submitMessage = ref("");
 const submitMessageType = ref("");
 
-// Form submission handler
 const submitForm = async () => {
   isSubmitting.value = true;
   submitMessage.value = "";
 
   try {
-    // Simulate form submission - replace with actual API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    const res = await fetch("/api/contact", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...form }),
+    });
 
-    // Reset form
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data?.error || "Failed to send message.");
+
     Object.keys(form).forEach((key) => (form[key] = ""));
-
     submitMessage.value = "Thank you for your message! We'll get back to you within 24 hours.";
     submitMessageType.value = "success";
   } catch (error) {
-    submitMessage.value = "There was an error sending your message. Please try again or call us directly.";
+    submitMessage.value = error?.message || "There was an error sending your message. Please try again.";
     submitMessageType.value = "error";
   } finally {
     isSubmitting.value = false;
-
-    // Clear message after 5 seconds
-    setTimeout(() => {
-      submitMessage.value = "";
-    }, 5000);
+    setTimeout(() => (submitMessage.value = ""), 5000);
   }
 };
 </script>
 
 <style scoped>
 .contact-section {
-  padding: 4rem 0;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  padding: 4.5rem 0;
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
   min-height: 100vh;
 }
 
 .container {
-  max-width: 1200px;
+  max-width: 1100px;
   margin: 0 auto;
   padding: 0 2rem;
-}
-
-.section-header {
-  text-align: center;
-  margin-bottom: 4rem;
-}
-
-.section-header h1 {
-  font-size: 3rem;
-  color: #2c3e50;
-  margin-bottom: 1rem;
-  font-weight: 700;
-}
-
-.section-subtitle {
-  font-size: 1.2rem;
-  color: #6c757d;
-  max-width: 600px;
-  margin: 0 auto;
-  line-height: 1.6;
+  text-align: left;
 }
 
 .contact-grid {
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 3rem;
-  margin-top: 1rem;
+  grid-template-columns: 1.55fr 0.9fr;
+  gap: 2rem;
+  margin-top: 0.5rem;
 }
 
-/* Contact Form Styles */
-.contact-form-container {
+.contact-form-container,
+.info-card,
+.hours-card,
+.quick-links-card {
   background: #fff;
-  border-radius: 16px;
-  padding: 2.5rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 18px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+}
+
+.contact-form-container {
+  padding: 2rem;
 }
 
 .form-header {
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .form-header h2 {
-  font-size: 1.8rem;
-  color: #2c3e50;
-  margin-bottom: 0.5rem;
-  font-weight: 600;
+  margin: 0 0 0.4rem;
+  font-size: 1.75rem;
+  font-weight: 950;
+  letter-spacing: -0.02em;
+  color: #0f172a;
 }
 
 .form-header p {
-  color: #6c757d;
-  line-height: 1.5;
+  margin: 0;
+  color: #475569;
+  line-height: 1.7;
+  max-width: 70ch;
 }
 
 .contact-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+  display: grid;
+  gap: 1.1rem;
 }
 
 .form-row {
@@ -298,59 +285,61 @@ const submitForm = async () => {
   gap: 1rem;
 }
 
+.form-group label {
+  font-weight: 850;
+  color: #0f172a;
+  margin-bottom: 0.45rem;
+  font-size: 0.92rem;
+}
+
 .form-group {
   display: flex;
   flex-direction: column;
 }
 
-.form-group label {
-  font-weight: 600;
-  color: #2c3e50;
-  margin-bottom: 0.5rem;
-  font-size: 0.9rem;
-}
-
 .form-input,
 .form-select,
 .form-textarea {
-  padding: 0.75rem 1rem;
-  border: 2px solid #e9ecef;
-  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 12px;
   font-size: 1rem;
-  transition: all 0.3s ease;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
   background: #fff;
+  color: #0f172a;
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 140px;
+  font-family: inherit;
 }
 
 .form-input:focus,
 .form-select:focus,
 .form-textarea:focus {
   outline: none;
-  border-color: #3452a3;
-  box-shadow: 0 0 0 3px rgba(52, 82, 163, 0.1);
-}
-
-.form-textarea {
-  resize: vertical;
-  min-height: 120px;
-  font-family: inherit;
+  border-color: rgba(52, 82, 163, 0.45);
+  box-shadow: 0 0 0 4px rgba(52, 82, 163, 0.12);
 }
 
 .submit-btn {
-  background: linear-gradient(135deg, #3452a3, #4a63b3);
-  color: white;
-  padding: 1rem 2rem;
+  margin-top: 0.5rem;
   border: none;
-  border-radius: 8px;
-  font-size: 1.1rem;
-  font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
-  margin-top: 1rem;
+  border-radius: 12px;
+  padding: 1rem 1.2rem;
+  font-size: 1.05rem;
+  font-weight: 950;
+  color: #0f172a;
+  background: linear-gradient(135deg, #dfff4f, #c8e526);
+  box-shadow: 0 14px 30px rgba(34, 197, 94, 0.18);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
 
 .submit-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(52, 82, 163, 0.3);
+  box-shadow: 0 18px 40px rgba(34, 197, 94, 0.25);
 }
 
 .submit-btn:disabled {
@@ -359,56 +348,48 @@ const submitForm = async () => {
 }
 
 .submit-message {
-  padding: 1rem;
-  border-radius: 8px;
-  font-weight: 500;
-  margin-top: 1rem;
+  padding: 0.9rem 1rem;
+  border-radius: 12px;
+  font-weight: 800;
 }
 
 .submit-message.success {
-  background: #d4edda;
-  color: #155724;
-  border: 1px solid #c3e6cb;
+  background: rgba(34, 197, 94, 0.12);
+  color: #166534;
+  border: 1px solid rgba(34, 197, 94, 0.25);
 }
 
 .submit-message.error {
-  background: #f8d7da;
-  color: #721c24;
-  border: 1px solid #f5c6cb;
+  background: rgba(239, 68, 68, 0.12);
+  color: #991b1b;
+  border: 1px solid rgba(239, 68, 68, 0.25);
 }
 
-/* Contact Info Styles */
+/* Sidebar */
 .contact-info {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1.25rem;
 }
 
 .info-card,
 .hours-card,
 .quick-links-card {
-  background: #fff;
-  border-radius: 16px;
-  padding: 2rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.info-header {
-  margin-bottom: 1.5rem;
+  padding: 1.5rem;
 }
 
 .info-header h3 {
-  font-size: 1.3rem;
-  color: #2c3e50;
-  font-weight: 600;
+  margin: 0 0 1rem;
+  font-size: 1.15rem;
+  font-weight: 950;
+  color: #0f172a;
 }
 
 .info-item {
   display: flex;
   align-items: flex-start;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  gap: 0.9rem;
+  margin-bottom: 0.9rem;
 }
 
 .info-item:last-child {
@@ -418,89 +399,84 @@ const submitForm = async () => {
 .info-item.clickable {
   text-decoration: none;
   color: inherit;
-  border-radius: 8px;
-  padding: 0.75rem;
-  margin: 0 -0.75rem 1.5rem -0.75rem;
-  transition: all 0.3s ease;
-  cursor: pointer;
+  border-radius: 14px;
+  padding: 0.9rem;
+  margin: 0 -0.9rem 0.75rem -0.9rem;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
 }
 
 .info-item.clickable:hover {
-  background: rgba(52, 82, 163, 0.05);
+  background: rgba(52, 82, 163, 0.06);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(52, 82, 163, 0.1);
-}
-
-.info-item.clickable:active {
-  transform: translateY(0);
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.10);
 }
 
 .info-icon {
   color: #3452a3;
   flex-shrink: 0;
-  padding: 0.5rem;
-  background: rgba(52, 82, 163, 0.1);
-  border-radius: 8px;
+  padding: 0.55rem;
+  background: rgba(52, 82, 163, 0.10);
+  border: 1px solid rgba(52, 82, 163, 0.14);
+  border-radius: 12px;
 }
 
 .info-content h4 {
-  font-size: 1.1rem;
-  color: #2c3e50;
-  font-weight: 600;
-  margin-bottom: 0.25rem;
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 950;
+  color: #0f172a;
 }
 
 .info-content p {
-  color: #6c757d;
+  margin: 0.15rem 0 0;
+  color: #475569;
   line-height: 1.5;
-  margin-bottom: 0.25rem;
 }
 
 .info-note {
-  font-size: 0.85rem;
-  color: #adb5bd !important;
+  font-size: 0.9rem;
+  color: rgba(71, 85, 105, 0.85) !important;
 }
 
-/* Hours Styles */
+/* Hours */
 .hours-list {
-  display: flex;
-  flex-direction: column;
+  display: grid;
   gap: 0.75rem;
 }
 
 .hours-item {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid #f8f9fa;
-}
-
-.hours-item:last-child {
-  border-bottom: none;
+  gap: 1rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 14px;
+  background: rgba(52, 82, 163, 0.06);
+  border: 1px solid rgba(15, 23, 42, 0.06);
 }
 
 .day {
-  font-weight: 600;
-  color: #2c3e50;
+  font-weight: 950;
+  color: #0f172a;
 }
 
 .time {
-  color: #6c757d;
-  font-weight: 500;
+  color: #3452a3;
+  font-weight: 900;
 }
 
 .hours-note {
-  margin-top: 1.5rem;
+  margin-top: 1rem;
   padding-top: 1rem;
-  border-top: 1px solid #e9ecef;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
 }
 
 .hours-note p {
-  font-size: 0.85rem;
-  color: #6c757d;
-  line-height: 1.5;
+  margin: 0;
+  font-size: 0.95rem;
+  color: #475569;
+  line-height: 1.6;
 }
+
 
 /* Quick Links Styles */
 .quick-links {
@@ -549,6 +525,31 @@ const submitForm = async () => {
   background: #388e3c;
   color: white;
 }
+/* Responsive */
+@media (max-width: 1024px) {
+  .contact-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 1rem;
+  }
+  .contact-section {
+    padding: 3.5rem 0;
+  }
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  .contact-form-container,
+  .info-card,
+  .hours-card,
+  .quick-links-card {
+    padding: 1.25rem;
+  }
+}
+
 
 /* Mobile Responsiveness */
 @media (max-width: 968px) {

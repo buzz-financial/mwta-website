@@ -99,6 +99,7 @@ const heroStyle = computed(() => ({
   width: 100%;
   max-width: 1200px;
   padding: 0 2rem;
+  margin-top: 6rem;
 }
 
 .text-container {
@@ -108,8 +109,8 @@ const heroStyle = computed(() => ({
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   max-width: 600px;
-  margin-left: 10%; /* Default left positioning */
   animation: fadeInUp 1s ease-out;
+  text-align: left;
 }
 
 /* Text positioning variants */

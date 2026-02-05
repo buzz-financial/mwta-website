@@ -74,7 +74,6 @@
           </div>
           <div class="footer-meta">
             <p class="copyright">© 2024 Mike White Tennis Academy. All rights reserved.</p>
-            <router-link to="/admin" class="admin-link">🔧 Admin</router-link>
           </div>
         </div>
       </div>

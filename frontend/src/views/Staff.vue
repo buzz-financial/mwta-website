@@ -1,5 +1,4 @@
 <template>
-  <!-- Full-width hero -->
   <Hero title="Staff" :backgroundImage="heroImg" />
 
   <div class="staff-section">
@@ -10,18 +9,15 @@
         <p class="section-subtitle">Our experienced team of tennis professionals are dedicated to helping you reach your full potential</p>
       </div>
 
-      <!-- Loading State -->
       <div v-if="loading" class="loading-state">
         <div class="spinner"></div>
         <p>Loading our amazing coaches...</p>
       </div>
 
-      <!-- Error State -->
       <div v-else-if="error" class="error-state">
         <p>Sorry, we couldn't load our coaches right now. Please try again later.</p>
       </div>
 
-      <!-- Staff Grid -->
       <div v-else class="staff-grid">
         <!-- Active Coaches -->
         <div v-for="member in activeCoaches" :key="member.id" class="staff-card">
@@ -81,84 +77,44 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import { supabase } from "../lib/supabase";
 import Hero from "../components/Hero.vue";
 import heroImg from "../assets/tennisball_closeup_hero.jpg";
 import mikePortrait from "../assets/mikeportrait.png";
 import beccaPortrait from "../assets/beccaportrait.png";
 
-// Reactive data
-const activeCoaches = ref([]);
-const loading = ref(true);
-const error = ref(null);
+const activeCoaches = [
+  {
+    id: 1,
+    name: "Mike White",
+    title: "Head Pro & Owner",
+    image: "mikeportrait.png",
+    email: "mike@mwtennis.com",
+    phone: "(801) 735-9434",
+    years_experience: 15,
+    main_certification: "USPTA Certified Professional",
+    key_specialties: ["Junior Development", "Competitive Training", "Match Strategy"],
+  },
+  {
+    id: 2,
+    name: "Becca Little",
+    title: "Assistant Coach",
+    image: "beccaportrait.png",
+    email: "becca@mwtennis.com",
+    phone: "(801) 735-9435",
+    years_experience: 8,
+    main_certification: "USPTA Certified Professional",
+    key_specialties: ["Beginner Instruction", "Youth Programs", "Group Clinics"],
+  },
+];
 
-// Image mapping for existing assets
 const imageMap = {
   "mikeportrait.png": mikePortrait,
   "beccaportrait.png": beccaPortrait,
 };
 
-// Helper function to get image URL
-const getImageUrl = (imageName, imageUrl) => {
-  // Priority: Base64 image_url > Local assets > Placeholder
-  if (imageUrl) {
-    return imageUrl; // This will be the Base64 string
-  }
-  return imageMap[imageName] || `https://via.placeholder.com/300x400/3452a3/ffffff?text=Photo+Coming+Soon`;
-};
-
-// Fetch coaches from Supabase
-const fetchCoaches = async () => {
-  try {
-    loading.value = true;
-    error.value = null;
-
-    const { data, error: supabaseError } = await supabase.from("coaches").select("*").eq("active", true).order("name");
-
-    if (supabaseError) {
-      throw supabaseError;
-    }
-
-    activeCoaches.value = data || [];
-  } catch (err) {
-    console.error("Error fetching coaches:", err);
-    error.value = err.message;
-
-    // Fallback to your existing data if Supabase fails
-    activeCoaches.value = [
-      {
-        id: 1,
-        name: "Mike White",
-        title: "Head Pro & Owner",
-        image: "mikeportrait.png",
-        email: "mike@mwtennis.com",
-        phone: "(801) 735-9434",
-        years_experience: 15,
-        main_certification: "USPTA Certified Professional",
-        key_specialties: ["Junior Development", "Competitive Training", "Match Strategy"],
-      },
-      {
-        id: 2,
-        name: "Becca Little",
-        title: "Assistant Coach",
-        image: "beccaportrait.png",
-        email: "becca@mwtennis.com",
-        phone: "(801) 735-9435",
-        years_experience: 8,
-        main_certification: "USPTA Certified Professional",
-        key_specialties: ["Beginner Instruction", "Youth Programs", "Group Clinics"],
-      },
-    ];
-  } finally {
-    loading.value = false;
-  }
-};
-
-// Load data when component mounts
-onMounted(() => {
-  fetchCoaches();
-});
+const getImageUrl = (imageName) =>
+  imageMap[imageName] ||
+  "https://via.placeholder.com/300x400/3452a3/ffffff?text=Photo+Coming+Soon";
 </script>
 
 <style scoped>
