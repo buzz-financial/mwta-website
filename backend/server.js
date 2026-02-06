@@ -92,6 +92,130 @@ const escapeHtml = (value) =>
     .replaceAll("'", "&#39;");
 
 
+const safeHeaderValue = (v) => String(v ?? "").replace(/[\r\n]+/g, " ").trim();
+
+const BRAND_NAME = process.env.BRAND_NAME || "Mike White Tennis Academy";
+const BRAND_SITE_URL = process.env.BRAND_SITE_URL || process.env.FRONTEND_ORIGIN || "";
+const BRAND_LOGO_URL = process.env.BRAND_LOGO_URL || ""; // must be an absolute https:// URL to render in email clients
+const BRAND_PRIMARY_COLOR = process.env.BRAND_PRIMARY_COLOR || "#3452a3";
+const BRAND_ACCENT_COLOR = process.env.BRAND_ACCENT_COLOR || "#dfff4f";
+const CONTACT_FROM_NAME = safeHeaderValue(process.env.CONTACT_FROM_NAME || `${BRAND_NAME} Contact`);
+
+const renderContactEmail = ({ fullName, email, phone, subject, subjectLabel, message, receivedAt }) => {
+  const preheader = `${subjectLabel} inquiry from ${fullName}`.slice(0, 140);
+
+  const text = [
+    `${BRAND_NAME} — New Contact Form Submission`,
+    `Received: ${receivedAt.toISOString()}`,
+    "",
+    `Name: ${fullName}`,
+    `Email: ${email}`,
+    `Phone: ${phone || "(not provided)"}`,
+    `Subject: ${subjectLabel} (${subject})`,
+    "",
+    "Message:",
+    String(message || ""),
+    "",
+    BRAND_SITE_URL ? `Website: ${BRAND_SITE_URL}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  const logoHtml = BRAND_LOGO_URL
+    ? `<img src="${escapeHtml(BRAND_LOGO_URL)}" width="140" alt="${escapeHtml(BRAND_NAME)}" style="display:block; max-width:140px; height:auto;" />`
+    : `<div style="font-weight:950; font-size:18px; letter-spacing:-0.01em; color:#0f172a;">${escapeHtml(
+        BRAND_NAME
+      )}</div>`;
+
+  const html = `
+  <div style="display:none; max-height:0; overflow:hidden; opacity:0; color:transparent;">
+    ${escapeHtml(preheader)}
+  </div>
+
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f6f8fb; padding:24px 0; margin:0;">
+    <tr>
+      <td align="center" style="padding:0 16px;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="width:600px; max-width:600px;">
+          <tr>
+            <td style="padding:0 0 14px 0;">
+              ${logoHtml}
+            </td>
+          </tr>
+
+          <tr>
+            <td style="background:#ffffff; border:1px solid rgba(15,23,42,0.10); border-radius:16px; overflow:hidden;">
+              <div style="height:6px; background:linear-gradient(135deg, ${escapeHtml(
+                BRAND_ACCENT_COLOR
+              )}, #c8e526);"></div>
+
+              <div style="padding:22px 22px 10px 22px; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;">
+                <div style="font-size:20px; font-weight:950; letter-spacing:-0.02em; color:#0f172a;">
+                  New contact form message
+                </div>
+                <div style="margin-top:6px; color:#475569; font-size:14px; line-height:1.6;">
+                  Received ${escapeHtml(receivedAt.toLocaleString())}
+                </div>
+
+                <div style="margin-top:16px; border:1px solid rgba(15,23,42,0.08); border-radius:14px; padding:14px;">
+                  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="font-size:14px; color:#0f172a;">
+                    <tr>
+                      <td style="padding:6px 0; width:140px; color:#475569; font-weight:800;">Name</td>
+                      <td style="padding:6px 0; font-weight:900;">${escapeHtml(fullName)}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding:6px 0; width:140px; color:#475569; font-weight:800;">Email</td>
+                      <td style="padding:6px 0;">
+                        <a href="mailto:${escapeHtml(email)}" style="color:${escapeHtml(
+                          BRAND_PRIMARY_COLOR
+                        )}; text-decoration:none; font-weight:900;">${escapeHtml(email)}</a>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="padding:6px 0; width:140px; color:#475569; font-weight:800;">Phone</td>
+                      <td style="padding:6px 0; font-weight:900;">${escapeHtml(phone || "(not provided)")}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding:6px 0; width:140px; color:#475569; font-weight:800;">Subject</td>
+                      <td style="padding:6px 0; font-weight:900;">${escapeHtml(subjectLabel)}</td>
+                    </tr>
+                  </table>
+                </div>
+
+                <div style="margin-top:16px; color:#475569; font-size:13px; font-weight:850;">Message</div>
+                <div style="margin-top:8px; padding:14px; border-radius:14px; background:rgba(52,82,163,0.06); border:1px solid rgba(52,82,163,0.12);">
+                  <div style="white-space:pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; font-size:13px; line-height:1.6; color:#0f172a;">${escapeHtml(
+                    message
+                  )}</div>
+                </div>
+
+                <div style="margin-top:16px; color:#64748b; font-size:12px; line-height:1.6;">
+                  Tip: hit “Reply” to respond directly to ${escapeHtml(fullName)} (Reply-To is set automatically).
+                </div>
+              </div>
+
+              <div style="padding:12px 22px 18px 22px; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; color:#94a3b8; font-size:12px; line-height:1.6;">
+                ${BRAND_SITE_URL ? `Sent from <a href="${escapeHtml(BRAND_SITE_URL)}" style="color:${escapeHtml(
+                  BRAND_PRIMARY_COLOR
+                )}; text-decoration:none;">${escapeHtml(BRAND_SITE_URL)}</a>` : "Sent from the website contact form"}
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:14px 0 0 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; color:#94a3b8; font-size:12px; text-align:center;">
+              © ${new Date().getFullYear()} ${escapeHtml(BRAND_NAME)}
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+  `.trim();
+
+  return { text, html, preheader };
+};
+
+
 const contactRateLimit = new Map();
 const CONTACT_WINDOW_MS = Number(process.env.CONTACT_RATE_WINDOW_MS || 60 * 60 * 1000); // 1 hour
 const CONTACT_MAX_PER_WINDOW = Number(process.env.CONTACT_RATE_MAX || 10);
@@ -185,33 +309,22 @@ app.post("/api/contact", async (req, res) => {
     const fullName = `${String(firstName).trim()} ${String(lastName).trim()}`.trim();
     const subjectLabel = contactSubjectLabel(subject);
 
-    const text = [
-      `New contact form submission`,
-      `Name: ${fullName}`,
-      `Email: ${email}`,
-      phone ? `Phone: ${phone}` : `Phone: (not provided)`,
-      `Subject: ${subjectLabel} (${subject})`,
-      "",
-      String(message),
-    ].join("\n");
-
-    const html = `
-      <h2>New contact form submission</h2>
-      <p><strong>Name:</strong> ${escapeHtml(fullName)}</p>
-      <p><strong>Email:</strong> ${escapeHtml(email)}</p>
-      <p><strong>Phone:</strong> ${escapeHtml(phone || "(not provided)")}</p>
-      <p><strong>Subject:</strong> ${escapeHtml(subjectLabel)} (${escapeHtml(subject)})</p>
-      <hr />
-      <pre style="white-space: pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;">${escapeHtml(
-        message
-      )}</pre>
-    `.trim();
+    const receivedAt = new Date();
+    const { text, html } = renderContactEmail({
+      fullName,
+      email,
+      phone,
+      subject,
+      subjectLabel,
+      message,
+      receivedAt,
+    });
 
     await transport.sendMail({
       to,
-      from,
-      replyTo: email,
-      subject: `[MWTA Contact] ${subjectLabel} - ${fullName}`,
+      from: `${CONTACT_FROM_NAME} <${from}>`,
+      replyTo: { name: fullName, address: email },
+      subject: `[MWTA] ${subjectLabel} — ${fullName}`,
       text,
       html,
     });

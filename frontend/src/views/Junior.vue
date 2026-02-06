@@ -71,7 +71,7 @@
               <p class="program-desc">{{ p.description }}</p>
 
               <div class="program-card__footer">
-                <a class="card-cta" :href="juniorProgramURL" target="_blank" rel="noopener">
+                <a class="card-cta" :href="p.url" target="_blank" rel="noopener">
                   Register
                 </a>
                 <RouterLink class="card-cta card-cta--ghost" to="/contact">
@@ -101,8 +101,7 @@ import Hero from "../components/Hero.vue";
 import heroImg from "../assets/tennisball_closeup_hero.jpg";
 import fallScheduleImg from "../assets/fall-schedule.png";
 
-const juniorProgramURL =
-  "https://docs.google.com/forms/d/e/1FAIpQLScx8bYMCL5frZuZvRrgc_U_n2uAOqKKGJRQKpsc-0jr_kEITQ/viewform";
+
 
 const programs = [
   {
@@ -111,6 +110,8 @@ const programs = [
     time: "Mon & Wed 4:30–5:30pm",
     description:
       "Perfect for beginners ages 5–10. We focus on fun fundamentals, coordination, and learning how to rally with confidence. Emphasis on core fundamentals.",
+    url: "https://secure.troute.io/hpp?sid=94"
+    
   },
   {
     id: 2,
@@ -118,6 +119,7 @@ const programs = [
     time: "Mon–Thurs 4:30–6:00pm",
     description:
       "Designed for the younger beginner up to Age 12. For developing players ready to train consistently. Emphasis on technique, movement, and match-style drills.",
+    url: "https://secure.troute.io/hpp?sid=95"
   },
   {
     id: 3,
@@ -125,6 +127,7 @@ const programs = [
     time: "Mon–Thurs 5:00–7:00pm",
     description:
       "Highschool aged or near highschool aged players looking to make varsity or play varsity. High-intensity training for competitive juniors, focusing on strategy, fitness, and match play.",
+    url: "https://secure.troute.io/hpp?sid=96"
   },
   {
     id: 4,
@@ -132,6 +135,7 @@ const programs = [
     time: "Mon–Fri 3:00–5:00pm",
     description:
       "Players must get permission to register for this class. All participants must be actively participating in tournaments. Includes strategy, video-style feedback, fitness, and structured match play.",
+    url: "https://secure.troute.io/hpp?sid=97"
   },
 ];
 
