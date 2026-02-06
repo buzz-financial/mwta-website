@@ -16,7 +16,7 @@
 
     <!-- Navigation links -->
     <ul :class="['navbar_links', { 'is-open': isOpen }]">
-      <li class="navbar_item"><RouterLink to="/">Home</RouterLink></li>
+      <li class="navbar_item"><RouterLink to="/" @click="closeMenu">Home</RouterLink></li>
 
       <!-- Clinics dropdown -->
       <li class="navbar_item dropdown" @mouseenter="showDropdown = true" @mouseleave="showDropdown = false">
@@ -25,22 +25,32 @@
           <span class="dropdown-arrow" :class="{ rotated: showDropdown || mobileDropdownOpen }">▼</span>
         </a>
         <ul :class="['dropdown-menu', { show: showDropdown || mobileDropdownOpen }]">
-          <li><RouterLink to="/junior">Junior Program</RouterLink></li>
-          <li><RouterLink to="/adult">Adult Clinic</RouterLink></li>
-          <li class="navbar_item"><RouterLink to="/privatelessons">Private Lessons</RouterLink></li>
+          <li><RouterLink to="/junior" @click="closeMenu">Junior Program</RouterLink></li>
+          <li><RouterLink to="/adult" @click="closeMenu">Adult Clinic</RouterLink></li>
+          <li class="navbar_item"><RouterLink to="/privatelessons" @click="closeMenu">Private Lessons</RouterLink></li>
         </ul>
       </li>
 
-      <li class="navbar_item"><RouterLink to="/tournaments">Tournaments</RouterLink></li>
-      <li class="navbar_item"><RouterLink to="/staff">Staff</RouterLink></li>
-      <li class="navbar_item"><RouterLink to="/contact">Contact</RouterLink></li>
+      <li class="navbar_item"><RouterLink to="/tournaments" @click="closeMenu">Tournaments</RouterLink></li>
+      <li class="navbar_item"><RouterLink to="/staff" @click="closeMenu">Staff</RouterLink></li>
+      <li class="navbar_item"><RouterLink to="/contact" @click="closeMenu">Contact</RouterLink></li>
     </ul>
   </nav>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, watch } from "vue";
+import { useRoute } from "vue-router";
 
+const route = useRoute();
+
+const closeMenu = () => {
+  isOpen.value = false;
+  mobileDropdownOpen.value = false;
+  showDropdown.value = false;
+};
+
+watch(() => route.fullPath, () => closeMenu());
 const isOpen = ref(false);
 const isHidden = ref(false);
 const showDropdown = ref(false);

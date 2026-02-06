@@ -1,4 +1,3 @@
-// backend/server.js
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
@@ -12,7 +11,33 @@ const PORT = process.env.PORT || 3001;
 
 const isProduction = process.env.NODE_ENV === "production";
 
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      useDefaults: true,
+      directives: {
+        "default-src": ["'self'"],
+        "base-uri": ["'self'"],
+        "object-src": ["'none'"],
+
+        "script-src": ["'self'", "'unsafe-inline'"],
+        "style-src": ["'self'", "'unsafe-inline'"],
+        "img-src": ["'self'", "data:", "https:"],
+        "font-src": ["'self'", "data:", "https:"],
+        "connect-src": ["'self'", "https:"],
+
+        "frame-src": [
+          "'self'",
+          "https://www.google.com",
+          "https://maps.google.com",
+          "https://booky.buzz",
+        ],
+      },
+    },
+    crossOriginEmbedderPolicy: false,
+  })
+);
+
 app.use(morgan("combined"));
 app.use(
   cors({

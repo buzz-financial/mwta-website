@@ -14,7 +14,7 @@
           <button class="hero-btn hero-btn--primary" @click="$router.push('/contact')">
             GET STARTED TODAY
           </button>
-          <button class="hero-btn hero-btn--secondary" @click="$router.push('/programs')">
+          <button class="hero-btn hero-btn--secondary" @click="$router.push({ hash: '#programs' })">
             VIEW PROGRAMS
           </button>
         </div>
@@ -57,7 +57,7 @@
               </div>
             </div>
           </div>
-          <button class="hero-btn hero-btn--primary" @click="$router.push('#programs')">View All Programs</button>
+          <button class="hero-btn hero-btn--primary" @click="$router.push({ hash: '#programs' })">View All Programs</button>
         </div>
   
         <div class="about-carousel">
@@ -128,7 +128,7 @@
             <button class="hero-btn hero-btn--primary" @click="$router.push('/contact')">
               Talk With a Coach
             </button>
-            <button class="hero-btn hero-btn--secondary" @click="$router.push('/programs')">
+            <button class="hero-btn hero-btn--secondary" @click="$router.push({ hash: '#programs' })">
               Explore Programs
             </button>
           </div>
