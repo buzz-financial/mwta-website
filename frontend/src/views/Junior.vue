@@ -6,7 +6,8 @@
       :backgroundImage="heroImg"
       ctaText="Contact Us"
       ctaLink="/contact"
-      height="55vh"
+      height="clamp(560px, 55vh, 860px)"
+
     />
 
     <main class="main-content">

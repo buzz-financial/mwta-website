@@ -6,7 +6,7 @@
       :backgroundImage="heroImg"
       ctaText="Contact Us"
       ctaLink="/contact"
-      height="55vh"
+      height="clamp(560px, 55vh, 860px)"
     />
 
     <main class="main-content">
@@ -91,14 +91,14 @@ import heroImg from "../assets/tennisball_closeup_hero.jpg";
 import adultClinicImg from "../assets/adult-clinic.png";
 
 const janAdultProgramURL =
-  "https://docs.google.com/forms/d/e/1FAIpQLSec986onBdo_7gXenNBZHKzcQ2cEx9g1dPO9Y5v-kpLKg99XQ/viewform";
+  "https://docs.google.com/forms/d/e/1FAIpQLScNEcLxMUiqTqujcFzqbDDj1tMDdyiQaS9whUsfl6kinD_2Yw/viewform";
 const febAdultProgramURL =
-  "https://docs.google.com/forms/d/e/1FAIpQLSdGUInnAF1xN85BNMuGQtWYfMODC0HXJwIY4WXaRRt3XYDaDA/viewform";
+  "https://docs.google.com/forms/d/e/1FAIpQLSc6lY3Ft2Kx3W4mOpVjsJQsgNUeegdUb779dkwKrmum_ZZhbg/viewform";
 
 const tournaments = [
   {
     id: 1,
-    name: "Jan 26th - 29th",
+    name: "Feb 9th - 11th",
     time: "10:30am–12:30pm",
     description:
       "Start the year strong with a fun, high-rep clinic focused on groundstrokes, volleys, and serves. Perfect for beginners and intermediate players who want to build consistency and confidence.",
@@ -106,7 +106,7 @@ const tournaments = [
   },
   {
     id: 2,
-    name: "Feb 2nd - 6th",
+    name: "Feb 16th - 20th",
     time: "10:30am–12:30pm",
     description:
       "Take the next step with more live-ball drills, movement, and point play. Great for players who want to improve strategy for singles/doubles and get match-ready in a supportive group.",
@@ -115,8 +115,8 @@ const tournaments = [
 ];
 
 const schedule = [
-  { name: "Jan 26th - 29th", time: "10:30am–12:30pm" },
-  { name: "Feb 2nd - 6th", time: "10:30am–12:30pm" },
+  { name: "Feb 9th - 11th", time: "10:30am–12:30pm" },
+  { name: "Feb 16th - 20th", time: "10:30am–12:30pm" },
 ];
 </script>
 
@@ -470,6 +470,10 @@ const schedule = [
   .cta-banner {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .media-img {
+    height: 100%;
   }
 }
 </style>

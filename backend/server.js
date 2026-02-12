@@ -96,7 +96,7 @@ const safeHeaderValue = (v) => String(v ?? "").replace(/[\r\n]+/g, " ").trim();
 
 const BRAND_NAME = process.env.BRAND_NAME || "Mike White Tennis Academy";
 const BRAND_SITE_URL = process.env.BRAND_SITE_URL || process.env.FRONTEND_ORIGIN || "";
-const BRAND_LOGO_URL = process.env.BRAND_LOGO_URL || ""; // must be an absolute https:// URL to render in email clients
+const BRAND_LOGO_URL = process.env.BRAND_LOGO_URL || "";
 const BRAND_PRIMARY_COLOR = process.env.BRAND_PRIMARY_COLOR || "#3452a3";
 const BRAND_ACCENT_COLOR = process.env.BRAND_ACCENT_COLOR || "#dfff4f";
 const CONTACT_FROM_NAME = safeHeaderValue(process.env.CONTACT_FROM_NAME || `${BRAND_NAME} Contact`);

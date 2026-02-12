@@ -5,7 +5,7 @@
     :backgroundImage="heroImg"
     ctaText="Schedule a Lesson"
     ctaLink="/contact"
-    height="55vh"
+    height="clamp(560px, 55vh, 860px)"
   />
 
   <section class="pl-section pl-intro">

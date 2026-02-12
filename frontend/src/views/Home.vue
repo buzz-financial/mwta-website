@@ -406,8 +406,7 @@ html {
   right: 50%;
   margin-left: -50vw;
   margin-right: -50vw;
-  margin-top: -2rem;
-  height: 90vh;
+  height: clamp(560px, 100vh, 920px);
   background-size: cover;
   background-position: center;
   background-attachment: scroll;
