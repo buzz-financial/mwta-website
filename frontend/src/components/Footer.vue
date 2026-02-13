@@ -21,9 +21,9 @@
                 <span class="contact-icon">📞</span>
                 (801) 735-9434
               </a>
-              <a href="mailto:MWTA.Tennis@gmail.com" class="contact-link">
+              <a href="mailto:mwta.stgeorge@gmail.com" class="contact-link">
                 <span class="contact-icon">📧</span>
-                MWTA.Tennis@gmail.com
+                mwta.stgeorge@gmail.com
               </a>
             </div>
 
@@ -73,7 +73,7 @@
             <img src="../assets/logo-full.png" alt="Mike White Tennis Academy" class="footer-logo" />
           </div>
           <div class="footer-meta">
-            <p class="copyright">© 2024 Mike White Tennis Academy. All rights reserved.</p>
+            <p class="copyright">© 2026 Mike White Tennis Academy. All rights reserved.</p>
           </div>
         </div>
       </div>
