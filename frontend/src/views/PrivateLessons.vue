@@ -4,7 +4,7 @@
     subtitle="1-on-1 coaching for juniors and adults. Build consistency, confidence, and match-ready skills with a plan tailored to you."
     :backgroundImage="heroImg"
     ctaText="Schedule a Lesson"
-    ctaLink="/contact"
+    ctaLink="/book-lesson"
     height="clamp(560px, 55vh, 860px)"
   />
 
