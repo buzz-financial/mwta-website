@@ -61,7 +61,7 @@
           </ul>
 
           <div class="pl-cta-row">
-            <RouterLink class="pl-cta pl-cta--primary" to="/contact">Request a Lesson</RouterLink>
+            <RouterLink class="pl-cta pl-cta--primary" to="/book-lesson">Book a Lesson</RouterLink>
             <a class="pl-cta pl-cta--secondary" href="#faq">Common Questions</a>
           </div>
         </div>
@@ -97,7 +97,15 @@
         </div>
       </div>
       
-      <iframe src="https://booky.buzz/widget/book/mike-white-tennis-academy" style="border: none; width: 100%; height: 650px;"></iframe>
+      <!-- Booking CTA -->
+      <div class="pl-booking-cta">
+        <div class="pl-booking-cta__text">
+          <h3>Ready to book?</h3>
+          <p>Choose your coach, pick a time that works, and submit your request — we'll confirm within 24 hours.</p>
+        </div>
+        <RouterLink class="pl-booking-cta__btn" to="/book-lesson">Book a Lesson →</RouterLink>
+      </div>
+
       <div class="pl-banner" id="faq">
         <div class="pl-banner-text">
           <h3>Questions about lesson length, pricing, or availability?</h3>
@@ -382,10 +390,53 @@ import heroImg from "../assets/tennisball_closeup_hero.jpg";
   white-space: nowrap;
 }
 
-iframe {
+.pl-booking-cta {
   margin-top: 2.5rem;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.1);
+  padding: 2.25rem;
+  border-radius: 20px;
+  background: #fff;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 12px 36px rgba(15, 23, 42, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.pl-booking-cta__text h3 {
+  margin: 0 0 0.4rem;
+  font-size: 1.35rem;
+  font-weight: 950;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+
+.pl-booking-cta__text p {
+  margin: 0;
+  color: #475569;
+  line-height: 1.6;
+  max-width: 52ch;
+}
+
+.pl-booking-cta__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 1.75rem;
+  border-radius: 14px;
+  text-decoration: none;
+  font-weight: 950;
+  font-size: 1rem;
+  background: linear-gradient(135deg, #dfff4f, #c8e526);
+  color: #0f172a;
+  white-space: nowrap;
+  box-shadow: 0 10px 28px rgba(200, 229, 38, 0.3);
+  transition: transform 0.15s;
+}
+
+.pl-booking-cta__btn:hover {
+  transform: translateY(-2px);
 }
 
 @media (max-width: 1024px) {

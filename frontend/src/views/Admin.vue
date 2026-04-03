@@ -21,26 +21,34 @@
         </div>
 
         <div class="stat-card">
-          <div class="stat-icon">🏆</div>
+          <div class="stat-icon">📋</div>
           <div class="stat-content">
-            <h3>Programs</h3>
-            <p class="stat-number">{{ stats.programs }}</p>
+            <h3>Registrations</h3>
+            <p class="stat-number">{{ stats.registrations }}</p>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">✅</div>
+          <div class="stat-content">
+            <h3>Active Members</h3>
+            <p class="stat-number">{{ stats.activeMembers }}</p>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">💰</div>
+          <div class="stat-content">
+            <h3>Monthly Revenue</h3>
+            <p class="stat-number">${{ stats.monthlyRevenue }}</p>
           </div>
         </div>
 
         <div class="stat-card">
           <div class="stat-icon">📅</div>
           <div class="stat-content">
-            <h3>This Month</h3>
-            <p class="stat-number">{{ stats.thisMonth }} Events</p>
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-icon">⭐</div>
-          <div class="stat-content">
-            <h3>Academy Rating</h3>
-            <p class="stat-number">4.9/5</p>
+            <h3>Lesson Requests</h3>
+            <p class="stat-number">{{ stats.pendingLessons }} pending</p>
           </div>
         </div>
       </div>
@@ -49,25 +57,13 @@
       <div class="management-grid">
         <div class="management-card">
           <div class="card-header">
-            <div class="card-icon">👥</div>
-            <h3>Manage Staff</h3>
+            <div class="card-icon">📋</div>
+            <h3>Registrations</h3>
           </div>
-          <p>Add, edit, and manage your coaching staff members and their information.</p>
+          <p>View and manage all program enrollments. Update statuses, view billing details, and contact members.</p>
           <div class="card-actions">
-            <button class="btn btn-primary" @click="goTo('/staff')">View Public Page</button>
-            <button class="btn btn-outline" @click="goTo('/admin/staff')">Manage Staff</button>
-          </div>
-        </div>
-
-        <div class="management-card">
-          <div class="card-header">
-            <div class="card-icon">🏆</div>
-            <h3>Programs & Schedules</h3>
-          </div>
-          <p>Edit program details, manage schedules, and update clinic dates.</p>
-          <div class="card-actions">
-            <button class="btn btn-primary" @click="goTo('/junior')">View Programs</button>
-            <button class="btn btn-outline" disabled>Edit Schedules (Coming Soon)</button>
+            <button class="btn btn-primary" @click="goTo('/admin/registrations')">Manage Registrations</button>
+            <button class="btn btn-outline" @click="goTo('/register')">Registration Form</button>
           </div>
         </div>
 
@@ -76,22 +72,34 @@
             <div class="card-icon">🎯</div>
             <h3>Private Lessons</h3>
           </div>
-          <p>Schedule and manage individual coaching sessions with students.</p>
+          <p>View incoming lesson booking requests and manage coach availability for private sessions.</p>
           <div class="card-actions">
-            <button class="btn btn-primary" @click="goTo('/privatelessons')">View Lessons Page</button>
-            <button class="btn btn-outline" disabled>Manage Bookings (Coming Soon)</button>
+            <button class="btn btn-primary" @click="goTo('/staff-portal')">Staff Portal</button>
+            <button class="btn btn-outline" @click="goTo('/privatelessons')">View Lessons Page</button>
           </div>
         </div>
 
         <div class="management-card">
           <div class="card-header">
-            <div class="card-icon">🏅</div>
-            <h3>Tournaments</h3>
+            <div class="card-icon">👥</div>
+            <h3>Manage Staff</h3>
           </div>
-          <p>Organize tournaments, manage registrations, and track results.</p>
+          <p>Add, edit, and manage your coaching staff members and their profile information.</p>
           <div class="card-actions">
-            <button class="btn btn-primary" @click="goTo('/tournaments')">View Tournaments</button>
-            <button class="btn btn-outline" disabled>Manage Events (Coming Soon)</button>
+            <button class="btn btn-primary" @click="goTo('/admin/staff')">Manage Staff</button>
+            <button class="btn btn-outline" @click="goTo('/staff')">View Public Page</button>
+          </div>
+        </div>
+
+        <div class="management-card">
+          <div class="card-header">
+            <div class="card-icon">🏆</div>
+            <h3>Programs & Schedules</h3>
+          </div>
+          <p>View program details and schedules. Direct students to registration from each program page.</p>
+          <div class="card-actions">
+            <button class="btn btn-primary" @click="goTo('/junior')">Junior Programs</button>
+            <button class="btn btn-outline" @click="goTo('/adult')">Adult Clinics</button>
           </div>
         </div>
       </div>
@@ -110,19 +118,45 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { supabase } from "../lib/supabase";
 
 const router = useRouter();
 
-// Sample stats (will be dynamic later)
 const stats = ref({
-  coaches: 2,
-  programs: 4,
-  thisMonth: 12,
-  rating: 4.9,
+  coaches: 0,
+  registrations: 0,
+  activeMembers: 0,
+  monthlyRevenue: "0",
+  pendingLessons: 0,
 });
+
+const loadStats = async () => {
+  try {
+    const [coachesRes, regsRes, lessonsRes] = await Promise.all([
+      supabase.from("coaches").select("id", { count: "exact" }).eq("active", true),
+      supabase.from("registrations").select("status, monthly_price"),
+      supabase.from("lesson_bookings").select("status").eq("status", "pending"),
+    ]);
+
+    const regs = regsRes.data || [];
+    const active = regs.filter((r) => r.status === "active");
+    const mrr = active.reduce((sum, r) => sum + (r.monthly_price || 0), 0);
+
+    stats.value = {
+      coaches: coachesRes.count || 0,
+      registrations: regs.length,
+      activeMembers: active.length,
+      monthlyRevenue: mrr.toFixed(0),
+      pendingLessons: lessonsRes.data?.length || 0,
+    };
+  } catch {
+    // leave defaults
+  }
+};
+
+onMounted(loadStats);
 
 // Navigation helper
 const goTo = (path) => {

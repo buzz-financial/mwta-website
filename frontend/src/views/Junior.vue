@@ -72,9 +72,9 @@
               <p class="program-desc">{{ p.description }}</p>
 
               <div class="program-card__footer">
-                <a class="card-cta" :href="p.url" target="_blank" rel="noopener">
+                <RouterLink class="card-cta" :to="`/register?type=junior&program=${p.id}`">
                   Register
-                </a>
+                </RouterLink>
                 <RouterLink class="card-cta card-cta--ghost" to="/contact">
                   Ask a Coach
                 </RouterLink>
@@ -87,9 +87,9 @@
               <h3>Ready to register?</h3>
               <p>Secure your spot and get started with the right group.</p>
             </div>
-            <a class="cta-banner__btn" :href="juniorProgramURL" target="_blank" rel="noopener">
+            <RouterLink class="cta-banner__btn" to="/register?type=junior">
               Register Now →
-            </a>
+            </RouterLink>
           </div>
         </div>
       </section>
@@ -104,39 +104,35 @@ import fallScheduleImg from "../assets/fall-schedule.png";
 
 
 
+
 const programs = [
   {
-    id: 1,
+    id: "peewees",
     name: "Pee-Wees",
     time: "Mon & Wed 4:30–5:30pm",
     description:
       "Perfect for beginners ages 5–10. We focus on fun fundamentals, coordination, and learning how to rally with confidence. Emphasis on core fundamentals.",
-    url: "https://secure.troute.io/hpp?sid=94"
-    
   },
   {
-    id: 2,
+    id: "champions",
     name: "Champions",
     time: "Mon–Thurs 4:30–6:00pm",
     description:
       "Designed for the younger beginner up to Age 12. For developing players ready to train consistently. Emphasis on technique, movement, and match-style drills.",
-    url: "https://secure.troute.io/hpp?sid=95"
   },
   {
-    id: 3,
+    id: "elite",
     name: "Elite",
     time: "Mon–Thurs 5:00–7:00pm",
     description:
       "Highschool aged or near highschool aged players looking to make varsity or play varsity. High-intensity training for competitive juniors, focusing on strategy, fitness, and match play.",
-    url: "https://secure.troute.io/hpp?sid=96"
   },
   {
-    id: 4,
+    id: "collegeprep",
     name: "College Prep",
     time: "Mon–Fri 3:00–5:00pm",
     description:
       "Players must get permission to register for this class. All participants must be actively participating in tournaments. Includes strategy, video-style feedback, fitness, and structured match play.",
-    url: "https://secure.troute.io/hpp?sid=97"
   },
 ];
 

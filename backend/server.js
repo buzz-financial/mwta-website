@@ -268,7 +268,46 @@ const createMailTransport = async () => {
 };
 
 
-// Contact form route (sends email)
+// ── Registration stub routes ─────────────────────────────────────────────────
+// NOTE: These stubs validate and log registrations server-side.
+// Connect Stripe or another payment processor here when ready.
+
+app.post("/api/registrations", (req, res) => {
+  const {
+    program_type, program_name, days_selected, monthly_price,
+    prorated_first_payment, first_name, last_name, email,
+  } = req.body || {};
+
+  if (!program_type || !program_name || !first_name || !last_name || !email) {
+    return res.status(400).json({ error: "Missing required registration fields." });
+  }
+
+  // Log the registration (data is stored via Supabase on the frontend)
+  console.log(`[REGISTRATION] ${first_name} ${last_name} (${email}) — ${program_name} — $${monthly_price}/mo — First: $${prorated_first_payment}`);
+
+  // TODO: Trigger payment processing (Stripe subscription) here
+  // TODO: Send confirmation email to customer
+  // TODO: Send notification email to admin
+
+  return res.json({ ok: true, message: "Registration received." });
+});
+
+app.post("/api/lesson-bookings", (req, res) => {
+  const { coach_name, first_name, last_name, email, preferred_date, preferred_time } = req.body || {};
+
+  if (!first_name || !last_name || !email || !preferred_date) {
+    return res.status(400).json({ error: "Missing required booking fields." });
+  }
+
+  console.log(`[LESSON BOOKING] ${first_name} ${last_name} (${email}) — Coach: ${coach_name} — ${preferred_date} @ ${preferred_time}`);
+
+  // TODO: Send notification email to coach and admin
+  // TODO: Send confirmation email to student
+
+  return res.json({ ok: true, message: "Booking request received." });
+});
+
+// ── Contact form route (sends email) ─────────────────────────────────────────
 app.post("/api/contact", async (req, res) => {
   const ip = req.headers["x-forwarded-for"]?.toString().split(",")[0]?.trim() || req.ip;
   const limit = checkContactRateLimit(ip);

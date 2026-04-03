@@ -66,7 +66,7 @@
               <p class="program-desc">{{ t.description }}</p>
 
               <div class="program-card__footer">
-                <a class="card-cta" :href="t.url" target="_blank" rel="noopener">Register</a>
+                <RouterLink class="card-cta" to="/register?type=adult">Register</RouterLink>
                 <RouterLink class="card-cta card-cta--ghost" to="/contact">Questions?</RouterLink>
               </div>
             </article>
@@ -90,11 +90,6 @@ import Hero from "../components/Hero.vue";
 import heroImg from "../assets/tennisball_closeup_hero.jpg";
 import adultClinicImg from "../assets/adult-clinic.png";
 
-const janAdultProgramURL =
-  "https://docs.google.com/forms/d/e/1FAIpQLScNEcLxMUiqTqujcFzqbDDj1tMDdyiQaS9whUsfl6kinD_2Yw/viewform";
-const febAdultProgramURL =
-  "https://docs.google.com/forms/d/e/1FAIpQLSc6lY3Ft2Kx3W4mOpVjsJQsgNUeegdUb779dkwKrmum_ZZhbg/viewform";
-
 const tournaments = [
   {
     id: 1,
@@ -102,7 +97,6 @@ const tournaments = [
     time: "10:30am–12:30pm",
     description:
       "Start the year strong with a fun, high-rep clinic focused on groundstrokes, volleys, and serves. Perfect for beginners and intermediate players who want to build consistency and confidence.",
-    url: janAdultProgramURL,
   },
   {
     id: 2,
@@ -110,7 +104,6 @@ const tournaments = [
     time: "10:30am–12:30pm",
     description:
       "Take the next step with more live-ball drills, movement, and point play. Great for players who want to improve strategy for singles/doubles and get match-ready in a supportive group.",
-    url: febAdultProgramURL,
   },
 ];
 
