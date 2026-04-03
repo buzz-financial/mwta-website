@@ -55,6 +55,7 @@
 
             <div class="coach-actions">
               <button @click="editCoach(coach)" class="btn btn-outline btn-sm">✏️ Edit</button>
+              <button @click="openAvailability(coach)" class="btn btn-info btn-sm">📅 Availability</button>
               <button @click="toggleCoachStatus(coach)" class="btn btn-sm" :class="coach.active ? 'btn-warning' : 'btn-success'">
                 {{ coach.active ? "🚫 Deactivate" : "✅ Activate" }}
               </button>
@@ -65,8 +66,61 @@
           <div v-if="coaches.length === 0" class="empty-state">
             <div class="empty-icon">👤</div>
             <h3>No coaches found</h3>
-            <p>Add your first coach to get started!</p>
-            <button @click="openAddForm" class="btn btn-primary">➕ Add Your First Coach</button>
+            <p>Seed the database with the default coaches, or add one manually.</p>
+            <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;margin-top:0.5rem;">
+              <button @click="seedDefaultCoaches" :disabled="seedingCoaches" class="btn btn-success">
+                {{ seedingCoaches ? 'Seeding…' : '🌱 Seed Default Coaches' }}
+              </button>
+              <button @click="openAddForm" class="btn btn-primary">➕ Add Manually</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Availability Modal -->
+      <div v-if="showAvailability" class="modal-overlay" @click="closeAvailability">
+        <div class="modal-content modal-availability" @click.stop>
+          <div class="modal-header">
+            <h2>📅 {{ availabilityCoach?.name }}'s Availability</h2>
+            <button @click="closeAvailability" class="close-btn">×</button>
+          </div>
+          <div class="availability-body">
+            <p class="avail-note">Set the days and times this coach is available for private lesson bookings.</p>
+
+            <div class="availability-grid">
+              <div v-for="day in availWeekDays" :key="day.id" class="day-block">
+                <div class="day-block__header">
+                  <h3>{{ day.label }}</h3>
+                  <label class="avail-toggle">
+                    <input type="checkbox" v-model="day.enabled" />
+                    <span class="toggle-track"></span>
+                    <span class="toggle-label">{{ day.enabled ? "Available" : "Off" }}</span>
+                  </label>
+                </div>
+
+                <div v-if="day.enabled" class="time-slots">
+                  <div v-for="(slot, idx) in day.slots" :key="idx" class="slot-row">
+                    <select v-model="slot.start" class="time-select">
+                      <option v-for="t in availTimeOptions" :key="t" :value="t">{{ t }}</option>
+                    </select>
+                    <span class="slot-dash">–</span>
+                    <select v-model="slot.end" class="time-select">
+                      <option v-for="t in availTimeOptions" :key="t" :value="t">{{ t }}</option>
+                    </select>
+                    <button class="slot-remove" @click="availRemoveSlot(day, idx)" title="Remove">×</button>
+                  </div>
+                  <button class="btn-add-slot" @click="availAddSlot(day)">+ Add time slot</button>
+                </div>
+                <div v-else class="day-off-note">Not available</div>
+              </div>
+            </div>
+
+            <div class="avail-footer">
+              <button class="btn btn-primary" @click="saveAvailability" :disabled="availSaving">
+                {{ availSaving ? "Saving…" : "Save Availability" }}
+              </button>
+              <span v-if="availSaveSuccess" class="save-success">✓ Saved!</span>
+            </div>
           </div>
         </div>
       </div>
@@ -359,6 +413,141 @@ const toggleCoachStatus = async (coach) => {
   } catch (error) {
     console.error("Error updating coach status:", error);
     alert("Failed to update coach status.");
+  }
+};
+
+// ── Seed default coaches ──────────────────────────────────────────────────────
+const seedingCoaches = ref(false);
+
+const defaultCoachesData = [
+  {
+    name: "Mike White",
+    title: "Head Pro & Owner",
+    image: "mikeportrait.png",
+    years_experience: 10,
+    main_certification: "USPTA Certified Professional",
+    key_specialties: ["Junior Development", "Competitive Training", "Match Strategy"],
+    active: true,
+    sort_order: 1,
+  },
+  {
+    name: "Becca Little",
+    title: "Assistant Coach",
+    image: "beccaportrait.png",
+    years_experience: 5,
+    main_certification: "USPTA Certified",
+    key_specialties: ["Beginner Instruction", "Youth Programs", "Group Clinics"],
+    active: true,
+    sort_order: 2,
+  },
+];
+
+const seedDefaultCoaches = async () => {
+  seedingCoaches.value = true;
+  try {
+    const { data, error } = await supabase.from("coaches").insert(defaultCoachesData).select();
+    if (error) throw error;
+    coaches.value = data || [];
+  } catch (err) {
+    alert("Seed failed: " + err.message);
+  } finally {
+    seedingCoaches.value = false;
+  }
+};
+
+// ── Availability ──────────────────────────────────────────────────────────────
+const showAvailability = ref(false);
+const availabilityCoach = ref(null);
+const availSaving = ref(false);
+const availSaveSuccess = ref(false);
+
+const availTimeOptions = (() => {
+  const opts = [];
+  for (let h = 6; h <= 21; h++) {
+    for (let m = 0; m < 60; m += 30) {
+      const hh = h % 12 === 0 ? 12 : h % 12;
+      const ampm = h < 12 ? "am" : "pm";
+      const mm = m === 0 ? "00" : "30";
+      opts.push(`${hh}:${mm}${ampm}`);
+    }
+  }
+  return opts;
+})();
+
+const availWeekDays = ref([
+  { id: "monday", label: "Monday", enabled: false, slots: [] },
+  { id: "tuesday", label: "Tuesday", enabled: false, slots: [] },
+  { id: "wednesday", label: "Wednesday", enabled: false, slots: [] },
+  { id: "thursday", label: "Thursday", enabled: false, slots: [] },
+  { id: "friday", label: "Friday", enabled: false, slots: [] },
+  { id: "saturday", label: "Saturday", enabled: false, slots: [] },
+  { id: "sunday", label: "Sunday", enabled: false, slots: [] },
+]);
+
+const openAvailability = async (coach) => {
+  availabilityCoach.value = coach;
+  availSaveSuccess.value = false;
+  // Reset days
+  availWeekDays.value.forEach((d) => { d.enabled = false; d.slots = []; });
+  // Load existing availability from DB
+  try {
+    const { data, error } = await supabase.from("staff_availability").select("*").eq("coach_id", coach.id);
+    if (!error && data) {
+      for (const row of data) {
+        const day = availWeekDays.value.find((d) => d.id === row.day_of_week);
+        if (day) {
+          day.enabled = true;
+          day.slots.push({ start: row.start_time, end: row.end_time });
+        }
+      }
+    }
+  } catch {
+    // show empty schedule
+  }
+  showAvailability.value = true;
+};
+
+const closeAvailability = () => {
+  showAvailability.value = false;
+  availabilityCoach.value = null;
+};
+
+const availAddSlot = (day) => {
+  day.slots.push({ start: "9:00am", end: "5:00pm" });
+};
+
+const availRemoveSlot = (day, idx) => {
+  day.slots.splice(idx, 1);
+};
+
+const saveAvailability = async () => {
+  availSaving.value = true;
+  availSaveSuccess.value = false;
+  try {
+    const coachId = availabilityCoach.value?.id;
+    if (!coachId) throw new Error("No coach selected.");
+
+    await supabase.from("staff_availability").delete().eq("coach_id", coachId);
+
+    const rows = [];
+    for (const day of availWeekDays.value) {
+      if (day.enabled && day.slots.length > 0) {
+        for (const slot of day.slots) {
+          rows.push({ coach_id: coachId, day_of_week: day.id, start_time: slot.start, end_time: slot.end });
+        }
+      }
+    }
+    if (rows.length > 0) {
+      const { error } = await supabase.from("staff_availability").insert(rows);
+      if (error) throw error;
+    }
+
+    availSaveSuccess.value = true;
+    setTimeout(() => { availSaveSuccess.value = false; }, 3000);
+  } catch (err) {
+    alert("Failed to save availability: " + err.message);
+  } finally {
+    availSaving.value = false;
   }
 };
 
@@ -779,6 +968,178 @@ onMounted(() => {
   border-top: 1px solid #e9ecef;
 }
 
+.btn-info {
+  background: #17a2b8;
+  color: white;
+}
+
+/* Availability Modal */
+.modal-availability {
+  max-width: 780px;
+}
+
+.availability-body {
+  padding: 1.5rem;
+}
+
+.avail-note {
+  color: #6c757d;
+  margin: 0 0 1.5rem;
+  font-size: 0.95rem;
+}
+
+.availability-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.day-block {
+  background: #f8f9fa;
+  border-radius: 10px;
+  border: 1px solid #e9ecef;
+  padding: 1rem;
+}
+
+.day-block__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.day-block__header h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+.avail-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+}
+
+.avail-toggle input[type="checkbox"] {
+  display: none;
+}
+
+.toggle-track {
+  width: 36px;
+  height: 20px;
+  background: #cbd5e1;
+  border-radius: 999px;
+  position: relative;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.toggle-track::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: white;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.avail-toggle input:checked + .toggle-track {
+  background: #22c55e;
+}
+
+.avail-toggle input:checked + .toggle-track::after {
+  transform: translateX(16px);
+}
+
+.toggle-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6c757d;
+}
+
+.time-slots {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.slot-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.time-select {
+  flex: 1;
+  padding: 0.35rem 0.4rem;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  color: #2c3e50;
+  min-width: 0;
+}
+
+.slot-dash {
+  color: #6c757d;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.slot-remove {
+  background: none;
+  border: none;
+  color: #dc3545;
+  cursor: pointer;
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 0 0.2rem;
+  flex-shrink: 0;
+}
+
+.btn-add-slot {
+  background: none;
+  border: 1px dashed #3452a3;
+  color: #3452a3;
+  border-radius: 6px;
+  padding: 0.35rem 0.6rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-add-slot:hover {
+  background: rgba(52, 82, 163, 0.06);
+}
+
+.day-off-note {
+  font-size: 0.8rem;
+  color: #adb5bd;
+  font-style: italic;
+}
+
+.avail-footer {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.save-success {
+  color: #28a745;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
 @media (max-width: 768px) {
   .admin-header {
     flex-direction: column;
@@ -795,6 +1156,14 @@ onMounted(() => {
 
   .form-actions {
     flex-direction: column;
+  }
+
+  .availability-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .coach-actions {
+    flex-wrap: wrap;
   }
 }
 </style>

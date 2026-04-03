@@ -55,7 +55,7 @@
           </div>
 
           <div class="cards-grid">
-            <article v-for="t in tournaments" :key="t.id" class="program-card">
+            <article v-for="t in tournaments.filter(t => t.active)" :key="t.id" class="program-card">
               <div class="program-card__topbar"></div>
 
               <header class="program-card__header">
@@ -86,31 +86,37 @@
 </template>
 
 <script setup>
+import { ref, computed, onMounted } from "vue";
 import Hero from "../components/Hero.vue";
 import heroImg from "../assets/tennisball_closeup_hero.jpg";
 import adultClinicImg from "../assets/adult-clinic.png";
+import { supabase } from "../lib/supabase";
 
-const tournaments = [
-  {
-    id: 1,
-    name: "Feb 9th - 11th",
-    time: "10:30am–12:30pm",
-    description:
-      "Start the year strong with a fun, high-rep clinic focused on groundstrokes, volleys, and serves. Perfect for beginners and intermediate players who want to build consistency and confidence.",
-  },
-  {
-    id: 2,
-    name: "Feb 16th - 20th",
-    time: "10:30am–12:30pm",
-    description:
-      "Take the next step with more live-ball drills, movement, and point play. Great for players who want to improve strategy for singles/doubles and get match-ready in a supportive group.",
-  },
+const defaultTournaments = [
+  { id: 1, program_id: "feb9", name: "Feb 9th - 11th", time: "10:30am–12:30pm", description: "Start the year strong with a fun, high-rep clinic focused on groundstrokes, volleys, and serves. Perfect for beginners and intermediate players who want to build consistency and confidence.", active: true },
+  { id: 2, program_id: "feb16", name: "Feb 16th - 20th", time: "10:30am–12:30pm", description: "Take the next step with more live-ball drills, movement, and point play. Great for players who want to improve strategy for singles/doubles and get match-ready in a supportive group.", active: true },
 ];
 
-const schedule = [
-  { name: "Feb 9th - 11th", time: "10:30am–12:30pm" },
-  { name: "Feb 16th - 20th", time: "10:30am–12:30pm" },
-];
+const tournaments = ref(defaultTournaments);
+
+const schedule = computed(() =>
+  tournaments.value.filter((t) => t.active).map((t) => ({ name: t.name, time: t.time }))
+);
+
+onMounted(async () => {
+  try {
+    const { data, error } = await supabase
+      .from("programs")
+      .select("*")
+      .eq("type", "adult")
+      .order("sort_order");
+    if (!error && data?.length) {
+      tournaments.value = data;
+    }
+  } catch {
+    // use defaults
+  }
+});
 </script>
 
 <style scoped>

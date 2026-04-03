@@ -13,6 +13,7 @@ import Admin from "../views/Admin.vue";
 import AdminStaff from "../views/AdminStaff.vue";
 import AdminRegistrations from "../views/AdminRegistrations.vue";
 import StaffPortal from "../views/StaffPortal.vue";
+import AdminPrograms from "../views/AdminPrograms.vue";
 import { nextTick } from "vue";
 import { requireAuth } from "../middleware/auth";
 
@@ -58,6 +59,12 @@ const routes = [
     path: "/admin/registrations",
     name: "AdminRegistrations",
     component: AdminRegistrations,
+    beforeEnter: requireAuth,
+  },
+  {
+    path: "/admin/programs",
+    name: "AdminPrograms",
+    component: AdminPrograms,
     beforeEnter: requireAuth,
   },
 ];

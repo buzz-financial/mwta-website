@@ -61,7 +61,7 @@
           </div>
 
           <div class="cards-grid">
-            <article v-for="p in programs" :key="p.id" class="program-card">
+            <article v-for="p in programs.filter(p => p.active)" :key="p.id" class="program-card">
               <div class="program-card__topbar"></div>
 
               <header class="program-card__header">
@@ -72,7 +72,7 @@
               <p class="program-desc">{{ p.description }}</p>
 
               <div class="program-card__footer">
-                <RouterLink class="card-cta" :to="`/register?type=junior&program=${p.id}`">
+                <RouterLink class="card-cta" :to="`/register?type=junior&program=${p.program_id || p.id}`">
                   Register
                 </RouterLink>
                 <RouterLink class="card-cta card-cta--ghost" to="/contact">
@@ -98,50 +98,39 @@
 </template>
 
 <script setup>
+import { ref, computed, onMounted } from "vue";
 import Hero from "../components/Hero.vue";
 import heroImg from "../assets/tennisball_closeup_hero.jpg";
 import fallScheduleImg from "../assets/fall-schedule.png";
+import { supabase } from "../lib/supabase";
 
-
-
-
-const programs = [
-  {
-    id: "peewees",
-    name: "Pee-Wees",
-    time: "Mon & Wed 4:30–5:30pm",
-    description:
-      "Perfect for beginners ages 5–10. We focus on fun fundamentals, coordination, and learning how to rally with confidence. Emphasis on core fundamentals.",
-  },
-  {
-    id: "champions",
-    name: "Champions",
-    time: "Mon–Thurs 4:30–6:00pm",
-    description:
-      "Designed for the younger beginner up to Age 12. For developing players ready to train consistently. Emphasis on technique, movement, and match-style drills.",
-  },
-  {
-    id: "elite",
-    name: "Elite",
-    time: "Mon–Thurs 5:00–7:00pm",
-    description:
-      "Highschool aged or near highschool aged players looking to make varsity or play varsity. High-intensity training for competitive juniors, focusing on strategy, fitness, and match play.",
-  },
-  {
-    id: "collegeprep",
-    name: "College Prep",
-    time: "Mon–Fri 3:00–5:00pm",
-    description:
-      "Players must get permission to register for this class. All participants must be actively participating in tournaments. Includes strategy, video-style feedback, fitness, and structured match play.",
-  },
+const defaultPrograms = [
+  { id: "peewees", program_id: "peewees", name: "Pee-Wees", time: "Mon & Wed 4:30–5:30pm", description: "Perfect for beginners ages 5–10. We focus on fun fundamentals, coordination, and learning how to rally with confidence. Emphasis on core fundamentals.", active: true },
+  { id: "champions", program_id: "champions", name: "Champions", time: "Mon–Thurs 4:30–6:00pm", description: "Designed for the younger beginner up to Age 12. For developing players ready to train consistently. Emphasis on technique, movement, and match-style drills.", active: true },
+  { id: "elite", program_id: "elite", name: "Elite", time: "Mon–Thurs 5:00–7:00pm", description: "Highschool aged or near highschool aged players looking to make varsity or play varsity. High-intensity training for competitive juniors, focusing on strategy, fitness, and match play.", active: true },
+  { id: "collegeprep", program_id: "collegeprep", name: "College Prep", time: "Mon–Fri 3:00–5:00pm", description: "Players must get permission to register for this class. All participants must be actively participating in tournaments. Includes strategy, video-style feedback, fitness, and structured match play.", active: true },
 ];
 
-const schedule = [
-  { name: "Pee-Wees", time: "Mon & Wed 4:30–5:30pm" },
-  { name: "Champions", time: "Mon–Thurs 4:30–6:00pm" },
-  { name: "Elite", time: "Mon–Thurs 5:00–7:00pm" },
-  { name: "College Prep", time: "Mon–Fri 3:00–5:00pm" },
-];
+const programs = ref(defaultPrograms);
+
+const schedule = computed(() =>
+  programs.value.filter((p) => p.active).map((p) => ({ name: p.name, time: p.time }))
+);
+
+onMounted(async () => {
+  try {
+    const { data, error } = await supabase
+      .from("programs")
+      .select("*")
+      .eq("type", "junior")
+      .order("sort_order");
+    if (!error && data?.length) {
+      programs.value = data;
+    }
+  } catch {
+    // use defaults
+  }
+});
 </script>
 
 <style scoped>

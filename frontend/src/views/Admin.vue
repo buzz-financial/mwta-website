@@ -96,10 +96,10 @@
             <div class="card-icon">🏆</div>
             <h3>Programs & Schedules</h3>
           </div>
-          <p>View program details and schedules. Direct students to registration from each program page.</p>
+          <p>Enable/disable programs, update schedules, and manage junior & adult clinic listings.</p>
           <div class="card-actions">
-            <button class="btn btn-primary" @click="goTo('/junior')">Junior Programs</button>
-            <button class="btn btn-outline" @click="goTo('/adult')">Adult Clinics</button>
+            <button class="btn btn-primary" @click="goTo('/admin/programs')">Manage Programs</button>
+            <button class="btn btn-outline" @click="goTo('/junior')">View Junior Page</button>
           </div>
         </div>
       </div>
