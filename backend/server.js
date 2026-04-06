@@ -12,6 +12,42 @@ const PORT = process.env.PORT || 3001;
 const isProduction = process.env.NODE_ENV === "production";
 const apiRoute = (path) => [path, `/api${path}`];
 
+const normalizeOrigin = (value) => {
+  if (!value) return null;
+
+  try {
+    return new URL(value).origin;
+  } catch {
+    return null;
+  }
+};
+
+const normalizeHostToOrigin = (value, protocol = "https") => {
+  if (!value) return null;
+  if (value.startsWith("http://") || value.startsWith("https://")) {
+    return normalizeOrigin(value);
+  }
+
+  return normalizeOrigin(`${protocol}://${value}`);
+};
+
+const getAllowedOrigins = (req) => {
+  const forwardedProto = req.header("x-forwarded-proto") || req.protocol || "https";
+  const requestHost = req.header("x-forwarded-host") || req.header("host");
+
+  return new Set(
+    [
+      normalizeOrigin(process.env.FRONTEND_ORIGIN),
+      normalizeHostToOrigin(process.env.VERCEL_URL),
+      normalizeHostToOrigin(process.env.VERCEL_BRANCH_URL),
+      normalizeHostToOrigin(process.env.VERCEL_PROJECT_PRODUCTION_URL),
+      normalizeHostToOrigin(requestHost, forwardedProto),
+      isProduction ? null : "http://localhost:5173",
+      isProduction ? null : "http://127.0.0.1:5173",
+    ].filter(Boolean)
+  );
+};
+
 app.use(
   helmet({
     contentSecurityPolicy: {
@@ -41,20 +77,19 @@ app.use(
 
 app.use(morgan("combined"));
 app.use(
-  cors({
-    origin: (origin, callback) => {
-      if (!origin) return callback(null, true);
+  cors((req, callback) => {
+    const origin = normalizeOrigin(req.header("origin"));
 
-      const allowed = [
-        process.env.FRONTEND_ORIGIN,
-        process.env.NODE_ENV === "production" ? undefined : "http://localhost:5173",
-        process.env.NODE_ENV === "production" ? undefined : "http://127.0.0.1:5173",
-      ].filter(Boolean);
+    if (!origin) {
+      return callback(null, { origin: true, credentials: true });
+    }
 
-      if (allowed.includes(origin)) return callback(null, true);
-      return callback(new Error(`CORS blocked origin: ${origin}`));
-    },
-    credentials: true,
+    const allowedOrigins = getAllowedOrigins(req);
+    if (allowedOrigins.has(origin)) {
+      return callback(null, { origin: true, credentials: true });
+    }
+
+    return callback(new Error(`CORS blocked origin: ${origin}`));
   })
 );
 app.use(express.json());
