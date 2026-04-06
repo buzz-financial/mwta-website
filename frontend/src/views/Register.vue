@@ -517,7 +517,7 @@ const JUNIOR_PROGRAMS = {
     minDays: 1,
     maxDays: 2,
     prices: { 1: 71.07, 2: 128.75 },
-    groupmeUrl: "", // add GroupMe invite link here
+    groupmeUrl: "https://groupme.com/join_group/93164987/kei3zyXE",
   },
   champions: {
     id: "champions",
@@ -528,7 +528,7 @@ const JUNIOR_PROGRAMS = {
     minDays: 1,
     maxDays: 4,
     prices: { 1: 132.87, 2: 204.97, 3: 297.67, 4: 400.67 },
-    groupmeUrl: "",
+    groupmeUrl: "https://groupme.com/join_group/93164987/kei3zyXE",
   },
   elite: {
     id: "elite",
@@ -539,7 +539,7 @@ const JUNIOR_PROGRAMS = {
     minDays: 1,
     maxDays: 4,
     prices: { 1: 204.97, 2: 277.07, 3: 400.67, 4: 513.97 },
-    groupmeUrl: "",
+    groupmeUrl: "https://groupme.com/join_group/93164503/6kK8AuFp",
   },
   collegeprep: {
     id: "collegeprep",
@@ -549,7 +549,7 @@ const JUNIOR_PROGRAMS = {
     availableDays: ["monday", "tuesday", "wednesday", "thursday", "friday"],
     allowedDayCounts: [3, 5],
     prices: { 3: 360.50, 5: 515.00 },
-    groupmeUrl: "",
+    groupmeUrl: "https://groupme.com/join_group/108033860/Ktt6zNkp",
     requiresPermission: true,
   },
 };
