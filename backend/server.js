@@ -272,7 +272,7 @@ const createMailTransport = async () => {
 // NOTE: These stubs validate and log registrations server-side.
 // Connect Stripe or another payment processor here when ready.
 
-app.post("/api/registrations", (req, res) => {
+app.post("/api/registrations", async (req, res) => {
   const {
     program_type, program_name, days_selected, monthly_price,
     prorated_first_payment, first_name, last_name, email,
@@ -286,14 +286,77 @@ app.post("/api/registrations", (req, res) => {
   console.log(`[REGISTRATION] ${first_name} ${last_name} (${email}) — ${program_name} — $${monthly_price}/mo — First: $${prorated_first_payment}`);
 
   // TODO: Trigger payment processing (Stripe subscription) here
-  // TODO: Send confirmation email to customer
-  // TODO: Send notification email to admin
+
+  const to = process.env.CONTACT_TO;
+  const from = process.env.CONTACT_FROM || process.env.SMTP_USER;
+  if (to && from) {
+    try {
+      const transport = await createMailTransport();
+      const fullName = `${String(first_name).trim()} ${String(last_name).trim()}`.trim();
+      const daysText = Array.isArray(days_selected) ? days_selected.join(", ") : (days_selected || "N/A");
+
+      const text = [
+        `${BRAND_NAME} — New Registration`,
+        `Received: ${new Date().toISOString()}`,
+        "",
+        `Name: ${fullName}`,
+        `Email: ${email}`,
+        `Program: ${program_name} (${program_type})`,
+        `Days: ${daysText}`,
+        `Monthly Price: $${monthly_price}`,
+        `First Payment (prorated): $${prorated_first_payment}`,
+      ].join("\n");
+
+      const html = `
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f6f8fb; padding:24px 0; margin:0;">
+        <tr>
+          <td align="center" style="padding:0 16px;">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="width:600px; max-width:600px;">
+              <tr>
+                <td style="padding:0 0 14px 0; font-weight:950; font-size:18px; color:#0f172a;">${escapeHtml(BRAND_NAME)}</td>
+              </tr>
+              <tr>
+                <td style="background:#ffffff; border:1px solid rgba(15,23,42,0.10); border-radius:16px; overflow:hidden;">
+                  <div style="height:6px; background:linear-gradient(135deg, ${escapeHtml(BRAND_ACCENT_COLOR)}, #c8e526);"></div>
+                  <div style="padding:22px; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;">
+                    <div style="font-size:20px; font-weight:950; letter-spacing:-0.02em; color:#0f172a;">New Program Registration</div>
+                    <div style="margin-top:6px; color:#475569; font-size:14px;">Received ${escapeHtml(new Date().toLocaleString())}</div>
+                    <div style="margin-top:16px; border:1px solid rgba(15,23,42,0.08); border-radius:14px; padding:14px;">
+                      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="font-size:14px; color:#0f172a;">
+                        <tr><td style="padding:6px 0; width:160px; color:#475569; font-weight:800;">Name</td><td style="padding:6px 0; font-weight:900;">${escapeHtml(fullName)}</td></tr>
+                        <tr><td style="padding:6px 0; color:#475569; font-weight:800;">Email</td><td style="padding:6px 0;"><a href="mailto:${escapeHtml(email)}" style="color:${escapeHtml(BRAND_PRIMARY_COLOR)}; font-weight:900;">${escapeHtml(email)}</a></td></tr>
+                        <tr><td style="padding:6px 0; color:#475569; font-weight:800;">Program</td><td style="padding:6px 0; font-weight:900;">${escapeHtml(program_name)} (${escapeHtml(program_type)})</td></tr>
+                        <tr><td style="padding:6px 0; color:#475569; font-weight:800;">Days</td><td style="padding:6px 0; font-weight:900;">${escapeHtml(daysText)}</td></tr>
+                        <tr><td style="padding:6px 0; color:#475569; font-weight:800;">Monthly Price</td><td style="padding:6px 0; font-weight:900;">$${escapeHtml(String(monthly_price))}</td></tr>
+                        <tr><td style="padding:6px 0; color:#475569; font-weight:800;">First Payment</td><td style="padding:6px 0; font-weight:900;">$${escapeHtml(String(prorated_first_payment))} (prorated)</td></tr>
+                      </table>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>`.trim();
+
+      await transport.sendMail({
+        to,
+        from: `${CONTACT_FROM_NAME} <${from}>`,
+        replyTo: { name: fullName, address: email },
+        subject: `[MWTA] New Registration — ${fullName} — ${program_name}`,
+        text,
+        html,
+      });
+    } catch (err) {
+      console.error("Registration notification email error:", err);
+    }
+  }
 
   return res.json({ ok: true, message: "Registration received." });
 });
 
-app.post("/api/lesson-bookings", (req, res) => {
-  const { coach_name, first_name, last_name, email, preferred_date, preferred_time } = req.body || {};
+app.post("/api/lesson-bookings", async (req, res) => {
+  const { coach_name, first_name, last_name, email, preferred_date, preferred_time, notes } = req.body || {};
 
   if (!first_name || !last_name || !email || !preferred_date) {
     return res.status(400).json({ error: "Missing required booking fields." });
@@ -301,8 +364,73 @@ app.post("/api/lesson-bookings", (req, res) => {
 
   console.log(`[LESSON BOOKING] ${first_name} ${last_name} (${email}) — Coach: ${coach_name} — ${preferred_date} @ ${preferred_time}`);
 
-  // TODO: Send notification email to coach and admin
-  // TODO: Send confirmation email to student
+  const to = process.env.CONTACT_TO;
+  const from = process.env.CONTACT_FROM || process.env.SMTP_USER;
+  if (to && from) {
+    try {
+      const transport = await createMailTransport();
+      const fullName = `${String(first_name).trim()} ${String(last_name).trim()}`.trim();
+
+      const text = [
+        `${BRAND_NAME} — New Lesson Booking Request`,
+        `Received: ${new Date().toISOString()}`,
+        "",
+        `Name: ${fullName}`,
+        `Email: ${email}`,
+        `Coach: ${coach_name || "No preference"}`,
+        `Preferred Date: ${preferred_date}`,
+        `Preferred Time: ${preferred_time || "Flexible"}`,
+        notes ? `\nNotes:\n${notes}` : "",
+      ].filter(v => v !== undefined).join("\n");
+
+      const html = `
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f6f8fb; padding:24px 0; margin:0;">
+        <tr>
+          <td align="center" style="padding:0 16px;">
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="width:600px; max-width:600px;">
+              <tr>
+                <td style="padding:0 0 14px 0; font-weight:950; font-size:18px; color:#0f172a;">${escapeHtml(BRAND_NAME)}</td>
+              </tr>
+              <tr>
+                <td style="background:#ffffff; border:1px solid rgba(15,23,42,0.10); border-radius:16px; overflow:hidden;">
+                  <div style="height:6px; background:linear-gradient(135deg, ${escapeHtml(BRAND_ACCENT_COLOR)}, #c8e526);"></div>
+                  <div style="padding:22px; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;">
+                    <div style="font-size:20px; font-weight:950; letter-spacing:-0.02em; color:#0f172a;">New Lesson Booking Request</div>
+                    <div style="margin-top:6px; color:#475569; font-size:14px;">Received ${escapeHtml(new Date().toLocaleString())}</div>
+                    <div style="margin-top:16px; border:1px solid rgba(15,23,42,0.08); border-radius:14px; padding:14px;">
+                      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="font-size:14px; color:#0f172a;">
+                        <tr><td style="padding:6px 0; width:160px; color:#475569; font-weight:800;">Name</td><td style="padding:6px 0; font-weight:900;">${escapeHtml(fullName)}</td></tr>
+                        <tr><td style="padding:6px 0; color:#475569; font-weight:800;">Email</td><td style="padding:6px 0;"><a href="mailto:${escapeHtml(email)}" style="color:${escapeHtml(BRAND_PRIMARY_COLOR)}; font-weight:900;">${escapeHtml(email)}</a></td></tr>
+                        <tr><td style="padding:6px 0; color:#475569; font-weight:800;">Coach</td><td style="padding:6px 0; font-weight:900;">${escapeHtml(coach_name || "No preference")}</td></tr>
+                        <tr><td style="padding:6px 0; color:#475569; font-weight:800;">Preferred Date</td><td style="padding:6px 0; font-weight:900;">${escapeHtml(preferred_date)}</td></tr>
+                        <tr><td style="padding:6px 0; color:#475569; font-weight:800;">Preferred Time</td><td style="padding:6px 0; font-weight:900;">${escapeHtml(preferred_time || "Flexible")}</td></tr>
+                      </table>
+                    </div>
+                    ${notes ? `<div style="margin-top:16px; color:#475569; font-size:13px; font-weight:850;">Notes</div>
+                    <div style="margin-top:8px; padding:14px; border-radius:14px; background:rgba(52,82,163,0.06); border:1px solid rgba(52,82,163,0.12);">
+                      <div style="white-space:pre-wrap; font-size:13px; line-height:1.6; color:#0f172a;">${escapeHtml(notes)}</div>
+                    </div>` : ""}
+                    <div style="margin-top:16px; color:#64748b; font-size:12px;">Tip: hit "Reply" to respond directly to ${escapeHtml(fullName)}.</div>
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>`.trim();
+
+      await transport.sendMail({
+        to,
+        from: `${CONTACT_FROM_NAME} <${from}>`,
+        replyTo: { name: fullName, address: email },
+        subject: `[MWTA] Lesson Booking Request — ${fullName}${coach_name ? ` — ${coach_name}` : ""}`,
+        text,
+        html,
+      });
+    } catch (err) {
+      console.error("Lesson booking notification email error:", err);
+    }
+  }
 
   return res.json({ ok: true, message: "Booking request received." });
 });

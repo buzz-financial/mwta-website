@@ -18,13 +18,21 @@
             <span>Days</span>
             <strong>{{ selectedDaysLabels }}</strong>
           </div>
+          <div v-if="form.programType === 'junior' && form.participants.length > 1" class="summary-row">
+            <span>Players</span>
+            <strong>{{ form.participants.map(p => p.name).join(', ') }}</strong>
+          </div>
+          <div v-else class="summary-row">
+            <span>Player</span>
+            <strong>{{ form.participants[0]?.name }}</strong>
+          </div>
           <div class="summary-row">
             <span>Monthly Price</span>
-            <strong>${{ monthlyPrice.toFixed(2) }}</strong>
+            <strong>${{ totalMonthlyPrice.toFixed(2) }}</strong>
           </div>
-          <div v-if="proratedAmount < monthlyPrice" class="summary-row highlight">
+          <div v-if="totalProratedAmount < totalMonthlyPrice" class="summary-row highlight">
             <span>First Payment (prorated)</span>
-            <strong>${{ proratedAmount.toFixed(2) }}</strong>
+            <strong>${{ totalProratedAmount.toFixed(2) }}</strong>
           </div>
           <div class="summary-row">
             <span>Next Billing Date</span>
@@ -164,11 +172,11 @@
               <div class="price-preview__label">
                 {{ form.days.length }} day{{ form.days.length !== 1 ? "s" : "" }} / week
               </div>
-              <div class="price-preview__price">${{ monthlyPrice.toFixed(2) }}<span>/mo</span></div>
+              <div class="price-preview__price">${{ monthlyPrice.toFixed(2) }}<span>/mo per player</span></div>
               <div v-if="proratedAmount < monthlyPrice" class="price-preview__prorate">
                 First payment: ${{ proratedAmount.toFixed(2) }} (prorated — billed today, then ${{
                   monthlyPrice.toFixed(2)
-                }}/mo starting {{ nextBillingDate }})
+                }}/mo per player starting {{ nextBillingDate }})
               </div>
             </div>
           </div>
@@ -188,12 +196,49 @@
 
           <form @submit.prevent="step = 'review'" class="info-form">
             <div class="form-section">
-              <h3 class="form-section-title">Participant</h3>
-              <div class="form-row">
-                <div class="form-group">
-                  <label>Participant's Full Name *</label>
-                  <input v-model="form.participantName" type="text" required placeholder="Full name of the player" />
+              <h3 class="form-section-title">
+                {{ form.programType === 'junior' ? 'Children / Players' : 'Participant' }}
+              </h3>
+
+              <div
+                v-for="(participant, idx) in form.participants"
+                :key="idx"
+                class="participant-row"
+              >
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>
+                      {{ form.programType === 'junior' ? `Child ${idx + 1} Full Name *` : "Participant's Full Name *" }}
+                    </label>
+                    <input
+                      v-model="participant.name"
+                      type="text"
+                      required
+                      placeholder="Full name of the player"
+                    />
+                  </div>
+                  <button
+                    v-if="form.programType === 'junior' && form.participants.length > 1"
+                    type="button"
+                    class="btn-remove-participant"
+                    @click="removeParticipant(idx)"
+                    title="Remove this child"
+                  >✕</button>
                 </div>
+              </div>
+
+              <button
+                v-if="form.programType === 'junior'"
+                type="button"
+                class="btn-add-participant"
+                @click="addParticipant"
+              >
+                + Add Another Child
+              </button>
+
+              <div v-if="form.programType === 'junior' && form.participants.length > 1" class="multi-child-price-note">
+                {{ form.participants.length }} children × ${{ monthlyPrice.toFixed(2) }}/mo =
+                <strong>${{ totalMonthlyPrice.toFixed(2) }}/mo total</strong>
               </div>
             </div>
 
@@ -300,10 +345,10 @@
             </div>
 
             <div class="review-section">
-              <h3>Participant</h3>
-              <div class="review-row">
-                <span>Player Name</span>
-                <strong>{{ form.participantName }}</strong>
+              <h3>{{ form.programType === 'junior' && form.participants.length > 1 ? 'Players' : 'Participant' }}</h3>
+              <div v-for="(participant, idx) in form.participants" :key="idx" class="review-row">
+                <span>{{ form.programType === 'junior' && form.participants.length > 1 ? `Child ${idx + 1}` : 'Player Name' }}</span>
+                <strong>{{ participant.name }}</strong>
               </div>
               <div class="review-row">
                 <span>Account Holder</span>
@@ -325,17 +370,21 @@
 
             <div class="review-section billing-section">
               <h3>Billing Summary</h3>
-              <div class="review-row">
-                <span>Monthly Rate</span>
+              <div v-if="form.programType === 'junior' && form.participants.length > 1" class="review-row">
+                <span>Per-Child Rate</span>
                 <strong>${{ monthlyPrice.toFixed(2) }}/mo</strong>
               </div>
-              <div v-if="proratedAmount < monthlyPrice" class="review-row prorate-row">
+              <div class="review-row">
+                <span>Monthly Rate{{ form.programType === 'junior' && form.participants.length > 1 ? ` (× ${form.participants.length} children)` : '' }}</span>
+                <strong>${{ totalMonthlyPrice.toFixed(2) }}/mo</strong>
+              </div>
+              <div v-if="totalProratedAmount < totalMonthlyPrice" class="review-row prorate-row">
                 <span>First Payment (prorated — {{ prorateDetails }})</span>
-                <strong class="prorate-amount">${{ proratedAmount.toFixed(2) }}</strong>
+                <strong class="prorate-amount">${{ totalProratedAmount.toFixed(2) }}</strong>
               </div>
               <div v-else class="review-row">
                 <span>First Payment</span>
-                <strong>${{ monthlyPrice.toFixed(2) }}</strong>
+                <strong>${{ totalMonthlyPrice.toFixed(2) }}</strong>
               </div>
               <div class="review-row">
                 <span>Recurring On</span>
@@ -464,7 +513,7 @@ const form = ref({
   programType: "",
   program: "",
   days: [],
-  participantName: "",
+  participants: [{ name: "" }],
   firstName: "",
   lastName: "",
   email: "",
@@ -514,6 +563,9 @@ const nextBillingDate = computed(() => {
   return next.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 });
 
+const totalMonthlyPrice = computed(() => monthlyPrice.value * form.value.participants.length);
+const totalProratedAmount = computed(() => proratedAmount.value * form.value.participants.length);
+
 const prorateDetails = computed(() => {
   const today = new Date();
   const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
@@ -547,8 +599,9 @@ const canAdvanceFromDays = computed(() => {
 
 const canAdvanceFromInfo = computed(() => {
   const f = form.value;
+  const allParticipantsNamed = f.participants.length > 0 && f.participants.every((p) => p.name.trim());
   return (
-    f.participantName &&
+    allParticipantsNamed &&
     f.firstName &&
     f.lastName &&
     f.email &&
@@ -566,6 +619,7 @@ const selectType = (typeId) => {
   form.value.programType = typeId;
   form.value.program = "";
   form.value.days = [];
+  form.value.participants = [{ name: "" }];
   step.value = "program";
 };
 
@@ -579,11 +633,19 @@ const onDayChange = () => {
   // no-op: validation handled by daysError computed
 };
 
+const addParticipant = () => {
+  form.value.participants.push({ name: "" });
+};
+
+const removeParticipant = (idx) => {
+  form.value.participants.splice(idx, 1);
+};
+
 const submitRegistration = async () => {
   submitting.value = true;
   submitError.value = "";
   try {
-    const payload = {
+    const basePayload = {
       program_type: form.value.programType,
       program_name: form.value.program,
       program_display_name: selectedProgram.value?.name,
@@ -599,13 +661,17 @@ const submitRegistration = async () => {
       state: form.value.state,
       zip: form.value.zip,
       country: form.value.country,
-      participant_name: form.value.participantName,
       responsible_party: `${form.value.firstName} ${form.value.lastName}`,
       cancellation_policy_agreed: form.value.cancelPolicyAgreed,
       status: "pending_payment",
     };
 
-    const { error } = await supabase.from("registrations").insert([payload]);
+    const rows = form.value.participants.map((p) => ({
+      ...basePayload,
+      participant_name: p.name,
+    }));
+
+    const { error } = await supabase.from("registrations").insert(rows);
     if (error) throw error;
 
     step.value = "success";
@@ -622,7 +688,7 @@ const resetForm = () => {
     programType: "",
     program: "",
     days: [],
-    participantName: "",
+    participants: [{ name: "" }],
     firstName: "",
     lastName: "",
     email: "",
@@ -1440,5 +1506,59 @@ onMounted(() => {
   .days-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+}
+
+/* ── Multi-participant ───────────────────────────────────────────────────── */
+.participant-row .form-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+.btn-remove-participant {
+  flex-shrink: 0;
+  background: none;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 6px;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 0.4rem 0.65rem;
+  margin-bottom: 0.1rem;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.btn-remove-participant:hover {
+  border-color: #f87171;
+  color: #ef4444;
+}
+
+.btn-add-participant {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+  background: none;
+  border: 1.5px dashed #3452a3;
+  border-radius: 8px;
+  color: #3452a3;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.55rem 1rem;
+  transition: background 0.15s;
+}
+
+.btn-add-participant:hover {
+  background: rgba(52, 82, 163, 0.06);
+}
+
+.multi-child-price-note {
+  margin-top: 0.85rem;
+  padding: 0.65rem 0.9rem;
+  background: #f0f4ff;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  color: #3452a3;
 }
 </style>
