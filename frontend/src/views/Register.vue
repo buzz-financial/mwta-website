@@ -51,7 +51,8 @@
         </div>
 
         <p class="success-note">
-          You'll receive a confirmation email shortly. Payment processing will be completed before your first session.
+          You'll receive a confirmation email shortly. Your payment has been processed and monthly billing is set up
+          to run on the 1st of each month.
           Questions? <RouterLink to="/contact">Contact us</RouterLink>.
         </p>
 
@@ -400,15 +401,99 @@
             </div>
           </div>
 
-          <div v-if="submitError" class="error-banner">{{ submitError }}</div>
-
           <div class="step-nav">
-            <button class="btn-back" @click="step = 'info'" :disabled="submitting">← Edit</button>
-            <button class="btn-submit" @click="submitRegistration" :disabled="submitting">
-              {{ submitting ? "Submitting…" : "Submit Registration" }}
-            </button>
+            <button class="btn-back" @click="step = 'info'">← Edit</button>
+            <button class="btn-submit" @click="step = 'payment'">Continue to Payment →</button>
           </div>
         </div>
+
+        <!-- Step 6: Payment -->
+        <div v-if="step === 'payment'" class="wizard-step">
+          <h2 class="step-title">Payment Details</h2>
+          <p class="step-subtitle">
+            Your card will be charged
+            <strong>${{ totalProratedAmount.toFixed(2) }}</strong> today, then
+            <strong>${{ totalMonthlyPrice.toFixed(2) }}/mo</strong> on the 1st of each month.
+          </p>
+
+          <div class="payment-form">
+            <div class="form-section">
+              <h3 class="form-section-title">Card Information</h3>
+              <div class="form-row full">
+                <div class="form-group">
+                  <label>Cardholder Name *</label>
+                  <input
+                    v-model="card.name"
+                    type="text"
+                    placeholder="Name as it appears on card"
+                    autocomplete="cc-name"
+                  />
+                </div>
+              </div>
+              <div class="form-row full">
+                <div class="form-group">
+                  <label>Card Number *</label>
+                  <input
+                    :value="card.number"
+                    type="text"
+                    inputmode="numeric"
+                    placeholder="1234 5678 9012 3456"
+                    maxlength="19"
+                    autocomplete="cc-number"
+                    @input="formatCardNumber"
+                  />
+                </div>
+              </div>
+              <div class="form-row card-expiry-row">
+                <div class="form-group">
+                  <label>Exp. Month *</label>
+                  <input
+                    v-model="card.expMonth"
+                    type="text"
+                    inputmode="numeric"
+                    placeholder="MM"
+                    maxlength="2"
+                    autocomplete="cc-exp-month"
+                  />
+                </div>
+                <div class="form-group">
+                  <label>Exp. Year *</label>
+                  <input
+                    v-model="card.expYear"
+                    type="text"
+                    inputmode="numeric"
+                    placeholder="YYYY"
+                    maxlength="4"
+                    autocomplete="cc-exp-year"
+                  />
+                </div>
+                <div class="form-group">
+                  <label>CVC *</label>
+                  <input
+                    v-model="card.cvc"
+                    type="password"
+                    inputmode="numeric"
+                    placeholder="•••"
+                    maxlength="4"
+                    autocomplete="cc-csc"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="secure-badge">🔒 Payments securely processed by Troute</div>
+
+            <div v-if="paymentError" class="error-banner">{{ paymentError }}</div>
+
+            <div class="step-nav">
+              <button class="btn-back" @click="step = 'review'" :disabled="paying">← Back</button>
+              <button class="btn-submit" @click="processPayment" :disabled="paying || !canPay">
+                {{ paying ? "Processing…" : `Pay $${totalProratedAmount.toFixed(2)} & Complete` }}
+              </button>
+            </div>
+          </div>
+        </div>
+
       </div>
     </template>
   </div>
@@ -502,12 +587,14 @@ const steps = [
   { id: "days", label: "Days" },
   { id: "info", label: "Your Info" },
   { id: "review", label: "Review" },
+  { id: "payment", label: "Payment" },
 ];
 
 // ─── State ───────────────────────────────────────────────────────────────────
 const step = ref("type");
-const submitting = ref(false);
-const submitError = ref("");
+const paying = ref(false);
+const paymentError = ref("");
+const card = ref({ name: "", number: "", expMonth: "", expYear: "", cvc: "" });
 
 const form = ref({
   programType: "",
@@ -614,6 +701,12 @@ const canAdvanceFromInfo = computed(() => {
   );
 });
 
+const canPay = computed(() => {
+  const c = card.value;
+  const digits = c.number.replace(/\s/g, "");
+  return c.name.trim() && digits.length >= 15 && c.expMonth && c.expYear && c.cvc.length >= 3;
+});
+
 // ─── Methods ─────────────────────────────────────────────────────────────────
 const selectType = (typeId) => {
   form.value.programType = typeId;
@@ -641,45 +734,87 @@ const removeParticipant = (idx) => {
   form.value.participants.splice(idx, 1);
 };
 
-const submitRegistration = async () => {
-  submitting.value = true;
-  submitError.value = "";
+const formatCardNumber = (e) => {
+  const val = e.target.value.replace(/\D/g, "").slice(0, 16);
+  card.value.number = val.replace(/(.{4})/g, "$1 ").trim();
+};
+
+const saveRegistration = async (paymentResult = {}) => {
+  const basePayload = {
+    program_type: form.value.programType,
+    program_name: form.value.program,
+    program_display_name: selectedProgram.value?.name,
+    days_selected: form.value.days,
+    monthly_price: monthlyPrice.value,
+    prorated_first_payment: proratedAmount.value,
+    first_name: form.value.firstName,
+    last_name: form.value.lastName,
+    email: form.value.email,
+    phone: form.value.phone,
+    address: form.value.address,
+    city: form.value.city,
+    state: form.value.state,
+    zip: form.value.zip,
+    country: form.value.country,
+    responsible_party: `${form.value.firstName} ${form.value.lastName}`,
+    cancellation_policy_agreed: form.value.cancelPolicyAgreed,
+    status: "active",
+    troute_customer_id: paymentResult.troute_customer_id || null,
+    troute_payment_id: paymentResult.troute_payment_id || null,
+  };
+
+  const rows = form.value.participants.map((p) => ({
+    ...basePayload,
+    participant_name: p.name,
+  }));
+
+  const { error } = await supabase.from("registrations").insert(rows);
+  if (error) throw error;
+};
+
+const processPayment = async () => {
+  paying.value = true;
+  paymentError.value = "";
   try {
-    const basePayload = {
-      program_type: form.value.programType,
-      program_name: form.value.program,
-      program_display_name: selectedProgram.value?.name,
-      days_selected: form.value.days,
-      monthly_price: monthlyPrice.value,
-      prorated_first_payment: proratedAmount.value,
-      first_name: form.value.firstName,
-      last_name: form.value.lastName,
-      email: form.value.email,
-      phone: form.value.phone,
-      address: form.value.address,
-      city: form.value.city,
-      state: form.value.state,
-      zip: form.value.zip,
-      country: form.value.country,
-      responsible_party: `${form.value.firstName} ${form.value.lastName}`,
-      cancellation_policy_agreed: form.value.cancelPolicyAgreed,
-      status: "pending_payment",
-    };
-
-    const rows = form.value.participants.map((p) => ({
-      ...basePayload,
-      participant_name: p.name,
-    }));
-
-    const { error } = await supabase.from("registrations").insert(rows);
-    if (error) throw error;
-
+    const res = await fetch("/api/payment/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        cardNumber: card.value.number,
+        cardExpMonth: card.value.expMonth,
+        cardExpYear: card.value.expYear,
+        cardCvc: card.value.cvc,
+        cardName: card.value.name,
+        program_type: form.value.programType,
+        program_name: form.value.program,
+        program_display_name: selectedProgram.value?.name,
+        days_selected: form.value.days,
+        monthly_price: monthlyPrice.value,
+        prorated_first_payment: proratedAmount.value,
+        total_monthly_price: totalMonthlyPrice.value,
+        total_prorated_amount: totalProratedAmount.value,
+        first_name: form.value.firstName,
+        last_name: form.value.lastName,
+        email: form.value.email,
+        phone: form.value.phone,
+        address: form.value.address,
+        city: form.value.city,
+        state: form.value.state,
+        zip: form.value.zip,
+        country: form.value.country,
+        participants: form.value.participants,
+        cancellation_policy_agreed: form.value.cancelPolicyAgreed,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Payment failed. Please try again.");
+    await saveRegistration(data);
     step.value = "success";
   } catch (err) {
-    console.error("Registration error:", err);
-    submitError.value = err.message || "Failed to submit registration. Please try again or contact us directly.";
+    console.error("Payment error:", err);
+    paymentError.value = err.message || "Payment failed. Please try again or contact us directly.";
   } finally {
-    submitting.value = false;
+    paying.value = false;
   }
 };
 
@@ -701,7 +836,9 @@ const resetForm = () => {
     cancelPolicyAgreed: false,
   };
   step.value = "type";
-  submitError.value = "";
+  card.value = { name: "", number: "", expMonth: "", expYear: "", cvc: "" };
+  paying.value = false;
+  paymentError.value = "";
 };
 
 // Pre-select from query params (e.g. /register?type=junior&program=peewees)
@@ -1506,6 +1643,31 @@ onMounted(() => {
   .days-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+}
+
+/* ── Step 6: Payment ─────────────────────────────────────────────────────── */
+.payment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.card-expiry-row {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.secure-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #475569;
+  background: rgba(15, 23, 42, 0.04);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 999px;
+  padding: 0.45rem 1rem;
+  width: fit-content;
 }
 
 /* ── Multi-participant ───────────────────────────────────────────────────── */

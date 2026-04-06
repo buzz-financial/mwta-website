@@ -157,20 +157,41 @@ create table if not exists registrations (
   id            uuid primary key default gen_random_uuid(),
   type          text,
   program       text,
+  program_type  text,
+  program_name  text,
+  program_display_name text,
+  participant_name text,
   first_name    text,
   last_name     text,
+  responsible_party text,
   email         text,
   phone         text,
   address       text,
   city          text,
   state         text,
   zip           text,
+  country       text,
   days_selected text[],
   monthly_price numeric,
+  prorated_first_payment numeric,
+  cancellation_policy_agreed boolean default false,
+  troute_customer_id text,
+  troute_payment_id text,
   status        text not null default 'pending',
   notes         text,
   created_at    timestamptz default now()
 );
+
+alter table registrations add column if not exists program_type text;
+alter table registrations add column if not exists program_name text;
+alter table registrations add column if not exists program_display_name text;
+alter table registrations add column if not exists participant_name text;
+alter table registrations add column if not exists responsible_party text;
+alter table registrations add column if not exists country text;
+alter table registrations add column if not exists prorated_first_payment numeric;
+alter table registrations add column if not exists cancellation_policy_agreed boolean default false;
+alter table registrations add column if not exists troute_customer_id text;
+alter table registrations add column if not exists troute_payment_id text;
 
 alter table registrations enable row level security;
 

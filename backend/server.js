@@ -4,7 +4,7 @@ const helmet = require("helmet");
 const morgan = require("morgan");
 const nodemailer = require("nodemailer");
 const path = require("path");
-require("dotenv").config();
+require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -505,6 +505,178 @@ app.post("/api/contact", async (req, res) => {
 
 
 
+
+// ── Troute payment checkout ──────────────────────────────────────────────────
+
+const TROUTE_API_URL = (process.env.TROUTE_API_URL || "https://secure.troute.io").replace(/\/$/, "");
+const TROUTE_LOGIN = process.env.TROUTE_LOGIN || "";
+const TROUTE_TRAN_KEY = process.env.TROUTE_TRAN_KEY || "";
+const TROUTE_PRODUCT_ID = process.env.TROUTE_PRODUCT_ID ? Number(process.env.TROUTE_PRODUCT_ID) : null;
+
+const trouteBasicAuth = () =>
+  "Basic " + Buffer.from(`${TROUTE_LOGIN}:${TROUTE_TRAN_KEY}`).toString("base64");
+
+const trouteRequest = async (method, path, body) => {
+  const res = await fetch(`${TROUTE_API_URL}${path}`, {
+    method,
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": trouteBasicAuth(),
+    },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+
+  const data = await res.json().catch(() => ({}));
+
+  if (!res.ok || (data.result && data.result !== "success")) {
+    const msg = data.message || data.error || data.reason_text || `Troute error (${res.status})`;
+    throw new Error(msg);
+  }
+
+  return data;
+};
+
+// Returns the YYYY-MM-DD string for the 1st of next month
+const nextFirstOfMonth = () => {
+  const now = new Date();
+  const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1));
+  return d.toISOString().slice(0, 10);
+};
+
+const firstDefined = (...values) => values.find((value) => value !== undefined && value !== null && value !== "");
+
+app.post("/api/payment/checkout", async (req, res) => {
+  const {
+    cardNumber, cardExpMonth, cardExpYear, cardCvc, cardName,
+    program_type, program_name, program_display_name,
+    monthly_price, prorated_first_payment,
+    total_monthly_price, total_prorated_amount,
+    first_name, last_name, email, phone,
+    address, city, state, zip, country,
+  } = req.body || {};
+
+  if (!cardNumber || !cardExpMonth || !cardExpYear || !cardCvc) {
+    return res.status(400).json({ error: "Missing card details." });
+  }
+  if (!program_type || !first_name || !last_name || !email) {
+    return res.status(400).json({ error: "Missing registration details." });
+  }
+  if (!TROUTE_LOGIN || !TROUTE_TRAN_KEY) {
+    return res.status(500).json({ error: "Payment processor not configured (missing credentials)." });
+  }
+  if (!TROUTE_PRODUCT_ID) {
+    return res.status(500).json({ error: "Payment processor not configured (missing product ID)." });
+  }
+
+  const chargeAmount = typeof total_prorated_amount === "number" ? total_prorated_amount : (prorated_first_payment || 0);
+  const monthlyAmount = typeof total_monthly_price === "number" ? total_monthly_price : (monthly_price || 0);
+  const countryCode = String(country || "US").slice(0, 3);
+
+  try {
+    // 1. Tokenize the card
+    const tokenRes = await trouteRequest("POST", "/tokens", {
+      number: String(cardNumber).replace(/\s/g, ""),
+      month: String(cardExpMonth).padStart(2, "0"),
+      year: String(cardExpYear).slice(-2),
+    });
+    const token = tokenRes.token;
+
+    // 2. Create customer record in Troute
+    const customerRes = await trouteRequest("POST", "/query/customer", {
+      customer: {
+        customer_information: {
+          firstname: first_name,
+          lastname: last_name,
+          email,
+          phone1: phone || "",
+          address1: address || "",
+          city: city || "",
+          state: state || "",
+          zip: zip || "",
+          country: countryCode,
+        },
+        billing_information: {
+          firstname: cardName ? cardName.trim().split(" ")[0] : first_name,
+          lastname: cardName ? cardName.trim().split(" ").slice(1).join(" ") || last_name : last_name,
+          address1: address || "",
+          city: city || "",
+          state: state || "",
+          zip: zip || "",
+          country: countryCode,
+        },
+      },
+    });
+    const customerId = firstDefined(
+      customerRes.customer_id,
+      customerRes.customer?.customer_id,
+      customerRes.customer?.uniqueID,
+      customerRes.customer?.id
+    );
+    if (!customerId) throw new Error("Customer ID not returned from Troute.");
+
+    // 3. Charge prorated first payment and save the payment method
+    const chargeRes = await trouteRequest("POST", "/charges", {
+      token,
+      cvc: cardCvc,
+      amount: chargeAmount,
+      customer_id: customerId,
+      save_payment_method: true,
+      transtype: "AUTH_CAPTURE",
+      billing: {
+        first_name,
+        last_name,
+        address,
+        city,
+        state,
+        zip,
+        country: countryCode,
+        phone,
+        email,
+        description: `${program_display_name || program_name} — Initial payment (prorated)`,
+      },
+    });
+
+    if (chargeRes.transaction?.status !== 1) {
+      throw new Error(chargeRes.transaction?.reason_text || "Charge declined. Please check your card details.");
+    }
+
+    const paymentId = firstDefined(
+      chargeRes.payment_method_id,
+      chargeRes.payment_id,
+      chargeRes.payment?.paymentID,
+      chargeRes.payment?.payment_id,
+      chargeRes.payment?.id
+    );
+    if (!paymentId) throw new Error("Payment method ID not returned from Troute.");
+
+    // 4. Create monthly recurring — bills on the 1st of each month
+    // TROUTE_PRODUCT_ID should be a $0-price product; monthly fee is passed as surcharge.
+    await trouteRequest("POST", "/query/recurring", {
+      recurring: {
+        customer_id: customerId,
+        payment_id: paymentId,
+        product_id: TROUTE_PRODUCT_ID,
+        surcharge: monthlyAmount,
+        interval: 3,        // Monthly
+        interval_number: 1, // Every 1 month
+        run_next: nextFirstOfMonth(),
+        run_until: 0,       // Until terminated
+        status: 1,          // Active
+      },
+    });
+
+    console.log(`[PAYMENT] Checkout complete — customer ${customerId}, payment ${paymentId}, ${first_name} ${last_name} (${email}), $${chargeAmount} charged, $${monthlyAmount}/mo recurring`);
+
+    return res.json({
+      success: true,
+      troute_customer_id: customerId,
+      troute_payment_id: paymentId,
+    });
+  } catch (err) {
+    console.error("[PAYMENT] Checkout error:", err.message);
+    return res.status(402).json({ error: err.message || "Payment failed. Please try again." });
+  }
+});
 
 // API 404 handler (must come before the frontend catch-all)
 app.use("/api", (req, res) => {
