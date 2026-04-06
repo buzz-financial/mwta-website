@@ -37,14 +37,14 @@
                 </a>
               </div>
             </div>
-            <div class="experience-badge">{{ member.years_experience }} Years</div>
+            <div v-if="member.years_experience" class="experience-badge">{{ member.years_experience }} Years</div>
           </div>
 
           <div class="staff-content">
             <h3 class="staff-name">{{ member.name }}</h3>
             <p class="staff-title">{{ member.title }}</p>
 
-            <div class="key-specialties">
+            <div v-if="member.key_specialties?.length" class="key-specialties">
               <span v-for="specialty in member.key_specialties" :key="specialty" class="specialty-tag">
                 {{ specialty }}
               </span>
@@ -77,44 +77,31 @@
 </template>
 
 <script setup>
+import { onMounted, ref } from "vue";
 import Hero from "../components/Hero.vue";
 import heroImg from "../assets/tennisball_closeup_hero.jpg";
-import mikePortrait from "../assets/mikeportrait.png";
-import beccaPortrait from "../assets/beccaportrait.png";
+import { fetchActiveCoaches, getCoachImageUrl } from "../lib/coaches";
 
-const activeCoaches = [
-  {
-    id: 1,
-    name: "Mike White",
-    title: "Head Pro & Owner",
-    image: "mikeportrait.png",
-    email: "mike@mwtennis.com",
-    phone: "(801) 735-9434",
-    years_experience: 15,
-    main_certification: "USPTA Certified Professional",
-    key_specialties: ["Junior Development", "Competitive Training", "Match Strategy"],
-  },
-  {
-    id: 2,
-    name: "Becca Little",
-    title: "Assistant Coach",
-    image: "beccaportrait.png",
-    email: "becca@mwtennis.com",
-    phone: "(801) 735-9435",
-    years_experience: 8,
-    main_certification: "USPTA Certified Professional",
-    key_specialties: ["Beginner Instruction", "Youth Programs", "Group Clinics"],
-  },
-];
+const activeCoaches = ref([]);
+const loading = ref(true);
+const error = ref(false);
 
-const imageMap = {
-  "mikeportrait.png": mikePortrait,
-  "beccaportrait.png": beccaPortrait,
+const loadCoaches = async () => {
+  try {
+    loading.value = true;
+    error.value = false;
+    activeCoaches.value = await fetchActiveCoaches();
+  } catch (err) {
+    console.error("Error fetching active coaches:", err);
+    error.value = true;
+  } finally {
+    loading.value = false;
+  }
 };
 
-const getImageUrl = (imageName) =>
-  imageMap[imageName] ||
-  "https://via.placeholder.com/300x400/3452a3/ffffff?text=Photo+Coming+Soon";
+const getImageUrl = (imageName, imageUrl) => getCoachImageUrl({ image: imageName, image_url: imageUrl });
+
+onMounted(loadCoaches);
 </script>
 
 <style scoped>

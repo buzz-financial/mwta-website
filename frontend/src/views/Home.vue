@@ -231,34 +231,28 @@
         <p class="section-description">Learn from experienced professionals dedicated to your tennis journey.</p>
       </div>
   
-      <div class="team-grid">
-        <div class="coach-card">
+      <div v-if="loadingCoaches" class="team-status">
+        Loading coaches...
+      </div>
+
+      <div v-else-if="coachesError" class="team-status team-status--error">
+        We couldn't load coaches right now. Please try again later.
+      </div>
+
+      <div v-else class="team-grid">
+        <div v-for="coach in featuredCoaches" :key="coach.id" class="coach-card">
           <div class="coach-media">
-            <img src="../assets/mikeportrait.png" alt="Coach Mike White" />
+            <img :src="getCoachImageUrl(coach)" :alt="coach.name" />
           </div>
           <div class="coach-body">
-            <h3 class="coach-name">Mike White</h3>
-            <p class="coach-role">Head Pro & Owner</p>
-            <p class="coach-bio">Former collegiate All-American with 15+ years of coaching experience.</p>
-            
+            <h3 class="coach-name">{{ coach.name }}</h3>
+            <p class="coach-role">{{ coach.title }}</p>
+            <p class="coach-bio">{{ getCoachSummary(coach) }}</p>
           </div>
           <router-link class="program-cta" to="/privatelessons">Book A Private Lesson</router-link>
         </div>
-  
-        <div class="coach-card">
-          <div class="coach-media">
-            <img src="../assets/beccaportrait.png" alt="Coach Becca Little" />
-          </div>
-          <div class="coach-body">
-            <h3 class="coach-name">Becca Little</h3>
-            <p class="coach-role">Assistant Coach</p>
-            <p class="coach-bio">Specialized in youth development and beginner instruction.</p>
-           
-          </div>
-          <router-link class="program-cta" to="/privatelessons">Book A Private Lesson</router-link>
-        </div>
-  
-        <div class="coach-card placeholder-card">
+
+        <div v-for="n in Math.max(0, 3 - featuredCoaches.length)" :key="`coach-placeholder-${n}`" class="coach-card placeholder-card">
           <div class="coach-media placeholder-image">
             <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
@@ -324,6 +318,8 @@
 </template>
 
 <script setup>
+import { computed, onMounted, ref } from "vue";
+import { fetchActiveCoaches, getCoachImageUrl, getCoachSummary } from "../lib/coaches";
 // Hero background
 import heroBg from "../assets/tenniscourthero.png";
 
@@ -345,6 +341,27 @@ import juniorImg from "../assets/juniorclinic.jpg";
 import adultImg from "../assets/adultclinic.jpg";
 import privateImg from "../assets/privateclinic.jpg";
 import tournamentImg from "../assets/tournament.jpg";
+
+const coaches = ref([]);
+const loadingCoaches = ref(true);
+const coachesError = ref(false);
+
+const featuredCoaches = computed(() => coaches.value.slice(0, 3));
+
+const loadCoaches = async () => {
+  try {
+    loadingCoaches.value = true;
+    coachesError.value = false;
+    coaches.value = await fetchActiveCoaches();
+  } catch (err) {
+    console.error("Error fetching active coaches:", err);
+    coachesError.value = true;
+  } finally {
+    loadingCoaches.value = false;
+  }
+};
+
+onMounted(loadCoaches);
 </script>
 
 <style scoped>
@@ -919,6 +936,23 @@ html {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 2rem;
   margin-top: 3rem;
+}
+
+.team-status {
+  margin-top: 3rem;
+  padding: 1.5rem;
+  border-radius: 18px;
+  text-align: center;
+  background: #f8fafc;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  color: #475569;
+  font-weight: 700;
+}
+
+.team-status--error {
+  color: #991b1b;
+  background: #fef2f2;
+  border-color: rgba(220, 38, 38, 0.12);
 }
 
 .coach-card {
