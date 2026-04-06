@@ -701,7 +701,11 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: "Something went wrong!" });
 });
 
-app.listen(PORT, () => {
-  console.log(`🎾 MWTA Server running on port ${PORT}`);
-  console.log(`📡 API available at http://localhost:${PORT}/api`);
-});
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`🎾 MWTA Server running on port ${PORT}`);
+    console.log(`📡 API available at http://localhost:${PORT}/api`);
+  });
+}
+
+module.exports = app;
