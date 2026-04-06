@@ -10,6 +10,7 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 const isProduction = process.env.NODE_ENV === "production";
+const apiRoute = (path) => [path, `/api${path}`];
 
 app.use(
   helmet({
@@ -272,7 +273,7 @@ const createMailTransport = async () => {
 // NOTE: These stubs validate and log registrations server-side.
 // Connect Stripe or another payment processor here when ready.
 
-app.post("/api/registrations", async (req, res) => {
+app.post(apiRoute("/registrations"), async (req, res) => {
   const {
     program_type, program_name, days_selected, monthly_price,
     prorated_first_payment, first_name, last_name, email,
@@ -355,7 +356,7 @@ app.post("/api/registrations", async (req, res) => {
   return res.json({ ok: true, message: "Registration received." });
 });
 
-app.post("/api/lesson-bookings", async (req, res) => {
+app.post(apiRoute("/lesson-bookings"), async (req, res) => {
   const { coach_name, first_name, last_name, email, preferred_date, preferred_time, notes } = req.body || {};
 
   if (!first_name || !last_name || !email || !preferred_date) {
@@ -436,7 +437,7 @@ app.post("/api/lesson-bookings", async (req, res) => {
 });
 
 // ── Contact form route (sends email) ─────────────────────────────────────────
-app.post("/api/contact", async (req, res) => {
+app.post(apiRoute("/contact"), async (req, res) => {
   const ip = req.headers["x-forwarded-for"]?.toString().split(",")[0]?.trim() || req.ip;
   const limit = checkContactRateLimit(ip);
   if (!limit.allowed) {
@@ -545,7 +546,7 @@ const nextFirstOfMonth = () => {
 
 const firstDefined = (...values) => values.find((value) => value !== undefined && value !== null && value !== "");
 
-app.post("/api/payment/checkout", async (req, res) => {
+app.post(apiRoute("/payment/checkout"), async (req, res) => {
   const {
     cardNumber, cardExpMonth, cardExpYear, cardCvc, cardName,
     program_type, program_name, program_display_name,
@@ -679,7 +680,10 @@ app.post("/api/payment/checkout", async (req, res) => {
 });
 
 // API 404 handler (must come before the frontend catch-all)
-app.use("/api", (req, res) => {
+app.use(["/api", "/"], (req, res, next) => {
+  if (!req.path.startsWith("/api") && !req.path.startsWith("/registrations") && !req.path.startsWith("/lesson-bookings") && !req.path.startsWith("/contact") && !req.path.startsWith("/payment")) {
+    return next();
+  }
   res.status(404).json({ error: "Route not found" });
 });
 
